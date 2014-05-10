@@ -1,0 +1,36 @@
+doctype html
+html
+  include inc/header
+
+  body
+  .navbar.navbar-default.navbar-static-top(role='navigation')
+      .container
+          .navbar-header
+            button.navbar-toggle(type='button', data-toggle='collapse', data-target='.navbar-collapse')
+              span.sr-only Toggle navigation
+              span.icon-bar
+              span.icon-bar
+              span.icon-bar
+            a.navbar-brand(href='/home') WorkOne
+          .navbar-collapse.collapse
+            ul.nav.navbar-nav
+              - var obj = { 'home':'主页', 'about':'关于' }
+                - each val, key in obj
+                  - if (id == key)
+                    li.active
+                      a(href='#{key}') #{val}
+                  - else            
+                    li
+                      a(href='#{key}') #{val}
+            ul.nav.navbar-nav.navbar-right
+              - var obj = { 'login':'登录', 'register':'注册' }
+                  - each val, key in obj
+                      - if (id == key)
+                          li.active
+                              a(href='#{key}') #{val}
+                      - else
+                          li
+                              a(href='#{key}') #{val}
+    block content
+  
+  include inc/footer
