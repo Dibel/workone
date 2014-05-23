@@ -4,6 +4,17 @@
 extends layout
 block content
     div.container
-        div.jumbotron
-            h1= title
-            p 欢迎来到 #{name}
+        div.row.clearfix
+            div.col-md-4.column
+            div.col-md-4.column
+                h1= title
+                form.role
+                    div.form-group
+                        label 用户名
+                        input.form-control(type="text", id="username", placeholder="请输入用户名")
+                    div.form-group
+                        label 密码
+                        input.form-control(type="password", id="password", placeholder="请输入密码")
+                    div.form-actions
+                        input.btn.btn-primary(type="button",value="注册")
+            div.col-md-4.column
