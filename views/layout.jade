@@ -23,7 +23,17 @@ html
                     li
                       a(href='#{key}') #{val}
             ul.nav.navbar-nav.navbar-right
-              - var obj = { 'login':'登录', 'register':'注册' }
+              if (user && user.length)
+                  - var obj = { 'user': user, 'logout':'注销' }
+                      - each val, key in obj
+                          - if (id == key)
+                              li.active
+                                  a(href='#{key}') #{val}
+                          - else
+                              li
+                                  a(href='#{key}') #{val}
+              else
+                - var obj = { 'login':'登录', 'register':'注册' }
                   - each val, key in obj
                       - if (id == key)
                           li.active
@@ -31,6 +41,9 @@ html
                       - else
                           li
                               a(href='#{key}') #{val}
-    block content
+    div.container
+        block content
+
+
   
   include inc/footer

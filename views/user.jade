@@ -3,10 +3,17 @@
 
 extends layout
 block content
-    div.container
-        div.jumbotron
-            h1= title
-            p.lead 欢迎来到 #{name}
-            p.lead 加入WorkOne来高效管理您的团队
-            p.lead
-                a.btn.btn-primary.btn-lg(href='register') 立即加入WorkOne
+  div.page-header
+    h1= title
+      small 协作
+  h2 我的小组
+  div.row.clearfix
+    div.col-md-2.column
+    div.col-md-6.column
+        if (success)
+            div.alert.alert-success
+                //test
+        if (error)
+            div.alert.alert-danger
+                strong 错误
+                p #{error}

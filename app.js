@@ -2,13 +2,15 @@ var express = require('express');
 var path = require('path');
 var favicon = require('static-favicon');
 var logger = require('morgan');
+var session = require("express-session");
 var cookieParser = require('cookie-parser');
+var flash = require('connect-flash');
 var bodyParser = require('body-parser');
 
 var routes = require('./routes/index');
 var login = require('./routes/login');
 var register = require('./routes/register');
-var users = require('./routes/users');
+//var users = require('./routes/users');
 
 var app = express();
 
@@ -20,15 +22,38 @@ app.use(favicon());
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
-app.use(cookieParser());
-app.use(require('less-middleware')({ src: path.join(__dirname, 'public') }));
+app.use(cookieParser('secret'));
+app.use(session({cookie: { maxAge: 60000 }}));
+app.use(flash());
+app.use(require('less-middleware')(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use(function(req, res, next){
+    res.locals.user=req.session.user;
+
+    var err = req.flash('error');
+    var success = req.flash('success');
+
+    res.locals.error = err.length ? err : null;
+    res.locals.success = success.length ? success : null;
+
+    next();
+});
+
+app.all('/user', function(req, res, next) {
+    if(req.session.user && req.session.user.length) {
+        next();
+    } else {
+        req.flash('error', '您尚未登录，请先登录~');
+        res.redirect('/login');
+    }
+});
+
 app.use('/', routes);
-app.use('/home', routes);
-app.use('/about', routes);
-app.use('/login', login);
-app.use('/register', register);
+//app.use('/home', routes);
+//app.use('/about', routes);
+//app.use('/login', login);
+//app.use('/register', register);
 //app.use('/users', users);
 
 /// catch 404 and forwarding to error handler

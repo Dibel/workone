@@ -3,18 +3,27 @@
 
 extends layout
 block content
-    div.container
-        div.row.clearfix
-            div.col-md-4.column
-            div.col-md-4.column
+    div.row.clearfix
+        div.col-md-4.column
+        div.col-md-4.column
+                if (success)
+                    div.alert.alert-success
+                        //test
+                if (error)
+                    div.alert.alert-danger
+                        strong 错误
+                        p #{error}
                 h1= title
-                form.role
-                    div.form-group
-                        label 用户名
-                        input.form-control(type="text", id="username", placeholder="请输入用户名")
-                    div.form-group
-                        label 密码
-                        input.form-control(type="password", id="password", placeholder="请输入密码")
-                    div.form-actions
-                        input.btn.btn-primary(type="button",value="登录", onclick="")
+                form.form-horizontal(method="post")
+                    fieldset
+                        div.form-group
+                            label.control-label(for="username") 用户名
+                            div.controls
+                                input.form-control(type="text", id="username", name="username", placeholder="请输入用户名")
+                        div.form-group
+                            label.control-label(for="password") 密码
+                            div.controls
+                                input.form-control(type="password", id="password", name="password", placeholder="请输入密码")
+                        div.form-actions
+                            input.btn.btn-primary(type="submit",value="登录")
             div.col-md-4.column
