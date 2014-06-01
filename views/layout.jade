@@ -18,29 +18,29 @@ html
                 - each val, key in obj
                   - if (id == key)
                     li.active
-                      a(href='#{key}') #{val}
+                      a(href='/#{key}') #{val}
                   - else            
                     li
-                      a(href='#{key}') #{val}
+                      a(href='/#{key}') #{val}
             ul.nav.navbar-nav.navbar-right
               if (user && user.length)
                   - var obj = { 'user': user, 'logout':'注销' }
                       - each val, key in obj
                           - if (id == key)
                               li.active
-                                  a(href='#{key}') #{val}
+                                  a(href='/#{key}') #{val}
                           - else
                               li
-                                  a(href='#{key}') #{val}
+                                  a(href='/#{key}') #{val}
               else
                 - var obj = { 'login':'登录', 'register':'注册' }
                   - each val, key in obj
                       - if (id == key)
                           li.active
-                              a(href='#{key}') #{val}
+                              a(href='/#{key}') #{val}
                       - else
                           li
-                              a(href='#{key}') #{val}
+                              a(href='/#{key}') #{val}
     div.container
         block content
 

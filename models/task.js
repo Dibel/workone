@@ -7,7 +7,9 @@ function Task(task) {
     this.startday=task.startday;
     this.endday=task.endday;
     this.projectname=task.projectname;
+    this.projectid=task.projectid;
     this.teamname=task.teamname;
+    this.teamid=task.teamid;
     this.remainday=task.remainday;
     this.taskid=task.taskid;
     this.complete=task.complete;

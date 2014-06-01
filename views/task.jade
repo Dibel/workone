@@ -4,26 +4,36 @@ extends layout
 
 block content
     div.container
-      .row.clearfix
-        .col-md-12.column
+            button.btn.btn-info(type='button', onclick='javascript:history.go(-1);') 返回
             .page-header
-                h1=task.name
-                    small 所属项目/所属团队/截止日期/剩余时间……
-            p.text-info.text-left
-                | 任务描述
-            div
-                | 这是一个任务描述
+                  h1=task.name+'  '
+                    -if (task.complete)
+                        small
+                            span.label.label-success 已完成
+                    -else
+                        small
+                            span.label.label-warning 未完成
+                            | &nbsp;
+                            -if (task.remainday<0)
+                                span.label.label-danger='剩余天数:'+task.remainday
+                            -else
+                                span.label.label-warning='剩余天数:'+task.remainday
+                div
+                    span=task.teamname+'/'+task.projectname+'/开始于:'+task.startday+'/截止于:'+task.endday
             .row.clearfix
-                .col-md-4.column
-                    h3
+                .col-md-2.column
+                    h3.text-primary.text-left
                         | 任务成员
-                    ul
-                      -each user in users
-                        li=user.name
+                    -each user in users
+                      h4=user.name
+                    h3.text-primary.text-left
+                        | 任务描述
+                    p=task.des
                 .col-md-8.column
                     h3.text-primary.text-left
                         | 讨论
-                    -each discuss in discusses
+                    -if(discusses)
+                     -each discuss in discusses
                       .panel.panel-info
                         .panel-heading
                             h3.panel-title
@@ -32,4 +42,10 @@ block content
                             =discuss.content
                         .panel-footer
                             =discuss.time
+                    form(method='post')
+                      .input-group
+                            input.form-control(type='text', id="discuss", name="discuss")
+                            input.form-control.hidden(type='text', id="taskid", name="taskid", value=task.taskid)
+                            span.input-group-btn
+                                button.btn.btn-primary(type='submit') 提交新讨论
 

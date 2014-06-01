@@ -5,7 +5,8 @@ var pg = require('pg');
 var crypto = require('crypto');
 var moment = require('moment');
 moment.lang('zh-cn');
-var connectionString = "postgres://myuser:123456@ipv6.dibel.ml/mydb";
+//var connectionString = "postgres://myuser:123456@ipv6.dibel.ml/mydb";
+var connectionString = "postgres://myuser:123456@localhost/mydb";
 var Discuss = require('./Discuss');
 var Team = require('./Team');
 var Project = require('./Project');
@@ -85,9 +86,10 @@ exports.register = function(req, res) {
         pg.connect(connectionString, function(err, client) {
             //TODO:SQL Query
             //var query = client.query('SELECT * FROM newteam($1,$2,$3)', [1,'test','test']);
-            var query = client.query('SELECT * FROM newuser($1,$2,$3);', [truename, password, name]);
+            var query = client.query('INSERT INTO "User" ("NAME","PASSWORD","LOGINNAME") VALUES($1,$2,$3) returning "ID";', [truename, password, name]);
             query.on('error', function(err) {
                 console.log(err.message);
+                req.flash('error', '该用户已存在！');
                 return res.redirect('/register');
             });
             query.on('row', function(row, result) {
@@ -97,18 +99,17 @@ exports.register = function(req, res) {
                 console.log(result.rows.length + ' rows were received');
                 if(result.rowCount > 0) {
                     console.log(result);
-                    if(result.rows[0].newuser == true) {
-                        req.flash('success', '注册成功！');
-                        req.session.user = new User({
+                    //req.flash('success', '注册成功！');
+                    req.session.user = new User({
                             name: name,
-                            //uid: uid,
+                            uid: result.rows[0].ID,
                             truename: truename
-                        });
-                        return res.redirect('/user');
-                    }
+                    });
+                    return res.redirect('/user');
+                } else {
+                    req.flash('error', '该用户已存在！');
+                    return res.redirect('/register');
                 }
-                req.flash('error','该用户已存在！');
-                return res.redirect('/register');
             });
         });
 
@@ -136,8 +137,8 @@ exports.user = function (req, res) {
                     var mytask = new Task({
                         name: result.rows[i].taskname,
                         des: result.rows[i].taskdes,
-                        startday: result.rows[i].startdate,
-                        endday: result.rows[i].enddate,
+                        startday: moment(result.rows[i].startdate).format('LL'),
+                        endday: moment(result.rows[i].enddate).format('LL'),
                         projectname: result.rows[i].projectname,
                         teamname: result.rows[i].teamname,
                         remainday: result.rows[i].remainday,
@@ -157,7 +158,7 @@ exports.user = function (req, res) {
                                 name: result.rows[i].project_name,
                                 des: result.rows[i].project_des,
                                 owner: result.rows[i].project_owner,
-                                startday: result.rows[i].setup_day,
+                                startday: moment(result.rows[i].setup_day).format('LL'),
                                 endday: moment(result.rows[i].closing_day).format('LL'),
                                 teamname: result.rows[i].team_name,
                                 projectid: result.rows[i].projectid,
@@ -232,22 +233,35 @@ exports.task = function(req, res) {
             console.log(err.messgae);
             return res.redirect('/home');
         }
-        client.query('SELECT * FROM "Task" WHERE "ID"=$1', [taskid], function(err, result) {
+        client.query('SELECT * FROM task_info($1)', [taskid], function(err, result) {
             if(err) {
                 console.log(err.messgae);
                 return res.redirect('/home');
             }
             if(result.rowCount > 0) {
                 var task = new Task({
-                    name: result.rows[0].NAME,
-                    des: result.rows[0].DESTRUCTION
+                    name: result.rows[0].taskname,
+                    des: result.rows[0].des,
+                    startday: moment(result.rows[0].startdate).format('LL'),
+                    endday: moment(result.rows[0].endday).format('LL'),
+                    projectname: result.rows[0].proname,
+                    projectid: result.rows[0].proid,
+                    teamname: result.rows[0].teamname,
+                    teamid: result.rows[0].teamid,
+                    remainday: result.rows[0].remaindays,
+                    taskid: taskid,
+                    complete: result.rows[0].complete
                 });
+                if(task.endday == "Invalid date") {
+                    task.endday = "无期限";
+                }
                 client.query("SELECT * FROM task_user($1)", [taskid], function(err, result) {
                     if(err) {
                         console.log(err.message);
                         return res.redirect('/home');
                     }
                     if(result.rowCount > 0) {
+                        console.log(result);
                         var myusers=[];
                         for(var i=0;i<result.rowCount;i++) {
                             var myuser = new User({
@@ -262,19 +276,21 @@ exports.task = function(req, res) {
                                 return res.redirect('/home');
                             }
                             if(result.rowCount > 0) {
+                                console.log(result);
                                 var mydiscusses=[];
-                                for(var i=0;i<result.rowCount;i++) {
+                                for(var i=result.rowCount-1;i>=0;i--) {
                                     var mydiscuss=new Discuss({
                                         username: result.rows[i].uname,
                                         uid: result.rows[i].uid,
                                         content: result.rows[i].discont,
-                                        time: moment(result.rows[i].closing_day).format('YYYY年MMMDo hh:mm:ss'),
+                                        time: moment(result.rows[i].distime).format('YYYY年MMMDo ahh:mm:ss'),
                                         discussid: result.rows[i].disid
                                     });
                                     mydiscusses.push(mydiscuss);
                                 }
-                                res.render('task', {title: '任务：'+task.name, user: req.session.user.truename, id: 'user', task: task, users: myusers, discusses: mydiscusses});
                             }
+                            res.render('task', {title: '任务：'+task.name, user: req.session.user.truename, id: 'user', task: task, users: myusers, discusses: mydiscusses});
+
                         });
                     }
                 });
@@ -283,6 +299,25 @@ exports.task = function(req, res) {
                 req.flash('error', '该任务不存在！');
                 return res.redirect('/home');
             }
+        });
+    });
+};
+
+exports.discuss = function(req, res) {
+    var content=req.body.discuss;
+    var taskid=req.body.taskid;
+    pg.connect(connectionString, function(err, client) {
+        if(err) {
+            console.log(err.messgae);
+            return res.redirect('/home');
+        }
+        client.query('SELECT * FROM newdiscuss($1,$2,$3)', [req.session.user.uid,taskid,content], function(err, result) {
+            if(err) {
+                console.log(err.messgae);
+                return res.redirect(req.path);
+            }
+            console.log(result);
+            return res.redirect(req.path);
         });
     });
 };

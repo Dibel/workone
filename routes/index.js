@@ -47,4 +47,6 @@ router.get('/project/:projectid', function(req, res) {
 
 router.get('/task/:taskid', db.task);
 
+router.post('/task/:taskid', db.discuss);
+
 module.exports = router;
