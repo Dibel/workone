@@ -23,7 +23,7 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
 app.use(cookieParser('secret'));
-app.use(session({cookie: { maxAge: 60000 }}));
+app.use(session({cookie: { maxAge: 1800000 }}));
 app.use(flash());
 app.use(require('less-middleware')(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -41,7 +41,7 @@ app.use(function(req, res, next){
 });
 
 app.all('/user', function(req, res, next) {
-    if(req.session.user && req.session.user.length) {
+    if(req.session.user && req.session.user.name.length) {
         next();
     } else {
         req.flash('error', '您尚未登录，请先登录~');

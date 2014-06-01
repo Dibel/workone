@@ -11,9 +11,7 @@ router.get('/home', function(req, res) {
   res.render('home', { title: 'WorkOne—高效的团队协作工具', id: 'home' });
 });
 
-router.get('/user', function(req, res) {
-    res.render('user', {title: req.session.user + '的主页', id: 'user'});
-});
+router.get('/user', db.user);
 
 router.get('/about', function(req, res) {
     res.render('about', { title: '关于WorkOne', id: 'about' });
@@ -34,12 +32,19 @@ router.post('/register', db.register);
 router.get('/logout', function(req, res) {
    if(req.session.user && req.session.user.length) {
        req.session.user = null;
+       req.session.uid = null;
        res.redirect('/home');
    }
 });
 
-router.get('/group/:groupID', function(req, res) {
-    res.send('group:'+req.params.groupID);
+router.get('/team/:teamid', function(req, res) {
+    res.send('group:'+req.params.teamid);
 });
+
+router.get('/project/:projectid', function(req, res) {
+    res.send('project:'+req.params.projectid);
+})
+
+router.get('/task/:taskid', db.task);
 
 module.exports = router;

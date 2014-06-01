@@ -1,0 +1,38 @@
+//
+   Created by Dibel on 2014/6/1.
+extends layout
+
+block content
+    div.container
+      .row.clearfix
+        .col-md-12.column
+            .page-header
+                h1 test
+                    small 所属项目/所属团队/截止日期/剩余时间……
+            p.text-info.text-left
+                | 任务描述
+            div
+                | 这是一个任务描述
+            .row.clearfix
+                .col-md-4.column
+                    h3
+                        | 任务成员
+                    ul
+                        li
+                            | 成员A
+                        li
+                            | 成员B
+                        li
+                            | ……
+                .col-md-8.column
+                    h3.text-primary.text-left
+                        | 讨论
+                    .panel.panel-info
+                        .panel-heading
+                            h3.panel-title
+                                | 用户名
+                        .panel-body
+                            | 内容
+                        .panel-footer
+                            | 日期
+

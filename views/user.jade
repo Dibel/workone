@@ -1,19 +1,62 @@
 //
    Created by Dibel on 2014/5/22.
-
 extends layout
+//以下为变量
+//var user_team_list = [{"name":"haha","id":1,"team.owner":ebi,"team.enddate":"2014";"team.des":"我爱北京天安门"},]
 block content
-  div.page-header
-    h1= title
-      small 协作
-  h2 我的小组
-  div.row.clearfix
-    div.col-md-2.column
-    div.col-md-6.column
-        if (success)
-            div.alert.alert-success
-                //test
-        if (error)
-            div.alert.alert-danger
-                strong 错误
-                p #{error}
+    div.page-header
+        h1= title
+            small 协作
+    div.container
+            .row.clearfix
+                .col-md-2.column
+                    h2.hidden test
+                    ul.nav.nav-pills.nav-stacked
+                        li.nav-header.disabled
+                           h3 我的小组&项目
+                             //- if(typeof(team) !== 'undefined')
+                        -each team in teams
+                         li.active
+                           a(href='/team/'+'#{team.teamid}')= team.name
+                         -each project in team.projects
+                          li
+                           a(href='/project/'+'#{project.projectid}')= project.name
+                .col-md-6.column
+                    h3 我的任务
+                    .panel-group
+                      -each task in tasks
+                        -if (task.remainday < 0)
+                          .panel.panel-danger
+                             .panel-heading
+                                 a.panel-title(href='/task/'+'#{task.taskid}')=task.name
+                                 | &nbsp;&nbsp;截止日期:
+                                 -if (task.endday != "Invalid date")
+                                     =task.endday
+                                 -else
+                                     | 无期限
+                                 | &nbsp;&nbsp;剩余时间：
+                                 =task.remainday
+                             .panel-collapse.collapse.in
+                                 .panel-body
+                                     =task.des
+                        -else
+                          .panel.panel-info
+                            .panel-heading
+                                a.panel-title(href='/task/'+'#{task.taskid}')=task.name
+                                | &nbsp;&nbsp;截止日期:
+                                -if (task.endday != "Invalid date")
+                                    =task.endday
+                                -else
+                                    | 无期限
+                                | &nbsp;&nbsp;剩余时间：
+                                =task.remainday
+                            .panel-collapse.collapse.in
+                                .panel-body
+                                    =task.des
+                        //.panel.panel-default
+                            .panel-heading
+                                a.panel-title(data-toggle='collapse', data-parent='#panel-812500', href='#panel-element-758966') Collapsible Group Item #2
+                            #panel-element-758966.panel-collapse.collapse
+                                .panel-body
+                                    | Anim pariatur cliche...
+                .col-md-4.column
