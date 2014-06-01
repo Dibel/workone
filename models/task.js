@@ -10,5 +10,6 @@ function Task(task) {
     this.teamname=task.teamname;
     this.remainday=task.remainday;
     this.taskid=task.taskid;
+    this.complete=task.complete;
 }
 module.exports = Task;

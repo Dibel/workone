@@ -6,9 +6,11 @@ var crypto = require('crypto');
 var moment = require('moment');
 moment.lang('zh-cn');
 var connectionString = "postgres://myuser:123456@ipv6.dibel.ml/mydb";
+var Discuss = require('./Discuss');
 var Team = require('./Team');
 var Project = require('./Project');
 var Task = require('./Task');
+var User = require('./User');
 
 //var client = new pg.Client(connectionString);
 
@@ -42,11 +44,11 @@ exports.login = function(req, res) {
                             if(result.rowCount > 0) {
                                 var uid = result.rows[0].ID.toString();
                                 var truename = result.rows[0].NAME;
-                                req.session.user = {
+                                req.session.user = new User({
                                     name: name,
                                     uid: uid,
                                     truename: truename
-                                };
+                                });
                                 return res.redirect('/user');
                             }
                         });
@@ -97,7 +99,11 @@ exports.register = function(req, res) {
                     console.log(result);
                     if(result.rows[0].newuser == true) {
                         req.flash('success', '注册成功！');
-                        req.session.user = name;
+                        req.session.user = new User({
+                            name: name,
+                            //uid: uid,
+                            truename: truename
+                        });
                         return res.redirect('/user');
                     }
                 }
@@ -220,7 +226,65 @@ exports.user = function (req, res) {
 
 
 exports.task = function(req, res) {
-
+    var taskid = req.params.taskid;
+    pg.connect(connectionString, function(err, client) {
+        if(err) {
+            console.log(err.messgae);
+            return res.redirect('/home');
+        }
+        client.query('SELECT * FROM "Task" WHERE "ID"=$1', [taskid], function(err, result) {
+            if(err) {
+                console.log(err.messgae);
+                return res.redirect('/home');
+            }
+            if(result.rowCount > 0) {
+                var task = new Task({
+                    name: result.rows[0].NAME,
+                    des: result.rows[0].DESTRUCTION
+                });
+                client.query("SELECT * FROM task_user($1)", [taskid], function(err, result) {
+                    if(err) {
+                        console.log(err.message);
+                        return res.redirect('/home');
+                    }
+                    if(result.rowCount > 0) {
+                        var myusers=[];
+                        for(var i=0;i<result.rowCount;i++) {
+                            var myuser = new User({
+                                name: result.rows[i].uname,
+                                uid: result.rows[i].uid
+                            });
+                            myusers.push(myuser);
+                        }
+                        client.query("SELECT * FROM task_discuss($1)", [taskid], function(err, result) {
+                            if(err) {
+                                console.log(err.message);
+                                return res.redirect('/home');
+                            }
+                            if(result.rowCount > 0) {
+                                var mydiscusses=[];
+                                for(var i=0;i<result.rowCount;i++) {
+                                    var mydiscuss=new Discuss({
+                                        username: result.rows[i].uname,
+                                        uid: result.rows[i].uid,
+                                        content: result.rows[i].discont,
+                                        time: moment(result.rows[i].closing_day).format('YYYY年MMMDo hh:mm:ss'),
+                                        discussid: result.rows[i].disid
+                                    });
+                                    mydiscusses.push(mydiscuss);
+                                }
+                                res.render('task', {title: '任务：'+task.name, user: req.session.user.truename, id: 'user', task: task, users: myusers, discusses: mydiscusses});
+                            }
+                        });
+                    }
+                });
+                //console.log(result);
+            } else {
+                req.flash('error', '该任务不存在！');
+                return res.redirect('/home');
+            }
+        });
+    });
 };
 //client.connect(function(err, result) {
 //    if(err) {

@@ -7,7 +7,7 @@ block content
       .row.clearfix
         .col-md-12.column
             .page-header
-                h1 test
+                h1=task.name
                     small 所属项目/所属团队/截止日期/剩余时间……
             p.text-info.text-left
                 | 任务描述
@@ -18,21 +18,18 @@ block content
                     h3
                         | 任务成员
                     ul
-                        li
-                            | 成员A
-                        li
-                            | 成员B
-                        li
-                            | ……
+                      -each user in users
+                        li=user.name
                 .col-md-8.column
                     h3.text-primary.text-left
                         | 讨论
-                    .panel.panel-info
+                    -each discuss in discusses
+                      .panel.panel-info
                         .panel-heading
                             h3.panel-title
-                                | 用户名
+                                =discuss.username
                         .panel-body
-                            | 内容
+                            =discuss.content
                         .panel-footer
-                            | 日期
+                            =discuss.time
 

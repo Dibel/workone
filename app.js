@@ -49,6 +49,33 @@ app.all('/user', function(req, res, next) {
     }
 });
 
+app.all('/team/:teamid', function(req, res, next) {
+    if(req.session.user && req.session.user.name.length) {
+        next();
+    } else {
+        req.flash('error', '您尚未登录，请先登录~');
+        res.redirect('/login');
+    }
+});
+
+app.all('/project/:projectid', function(req, res, next) {
+    if(req.session.user && req.session.user.name.length) {
+        next();
+    } else {
+        req.flash('error', '您尚未登录，请先登录~');
+        res.redirect('/login');
+    }
+});
+
+app.all('/task/:taskid', function(req, res, next) {
+    if(req.session.user && req.session.user.name.length) {
+        next();
+    } else {
+        req.flash('error', '您尚未登录，请先登录~');
+        res.redirect('/login');
+    }
+});
+
 app.use('/', routes);
 //app.use('/home', routes);
 //app.use('/about', routes);

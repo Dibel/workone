@@ -43,7 +43,7 @@ router.get('/team/:teamid', function(req, res) {
 
 router.get('/project/:projectid', function(req, res) {
     res.send('project:'+req.params.projectid);
-})
+});
 
 router.get('/task/:taskid', db.task);
 
