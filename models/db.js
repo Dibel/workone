@@ -322,7 +322,12 @@ exports.discuss = function(req, res) {
 };
 
 exports.newtask = function(req, res) {
-
+    console.log(req.body);
+    var taskname = req.body.taskname;
+    var taskdes = req.body.taskdes;
+    var date = req.body.date;
+    var arr = Object.keys(req.body);
+    console.log(arr);
 };
 exports.project = function(req, res) {
     var projectid = req.params.projectid;

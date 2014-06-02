@@ -85,23 +85,23 @@ block content
                                         .form-group
                                             label.control-label.col-xs-2(for="taskname") 任务名
                                             .col-xs-10
-                                                input.form-control(type='text', id="taskname")
+                                                input.form-control(type='text', id="taskname", name="taskname")
                                         .form-group
                                             label.control-label.col-xs-2(for="taskdes") 任务描述
                                             .col-xs-10
-                                                input.form-control(type='text', id="taskdes")
+                                                input.form-control(type='text', id="taskdes", name="taskdes")
                                         .form-group
                                             label.control-label.col-xs-2 截止日期
                                             .col-xs-10(id='select')
                                                 .input-group.date
-                                                    input.form-control(type='text')
+                                                    input.form-control(type='text', id='date', name='date')
                                                     span.input-group-addon
                                                         i.glyphicon.glyphicon-th
                                                 script(type='text/javascript').
                                                   $(".input-group.date").datepicker({
                                                     todayBtn: "linked",
                                                     language: "zh-CN",
-                                                    autoclose: true,
+                                                    autoclose: true
                                                   });
                                         .form-group
                                             .list-group
@@ -110,9 +110,9 @@ block content
                                                     input.all.pull-right(title='toggle all', type='checkbox')
                                                 -if(users)
                                                  -each user in users
-                                                    a.list-group-item(href='#', name='')
+                                                    a.list-group-item(href='#')
                                                         =user.name+' @'+user.loginname
-                                                        input.pull-right(type='checkbox')
+                                                        input.pull-right(type='checkbox', name=user.id)
                                                  script.
                                                      $('.all').click(function(e){
                                                          e.stopPropagation();
