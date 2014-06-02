@@ -376,75 +376,55 @@ exports.project = function(req, res) {
                 return res.redirect('/project/'+projectid);
             });
         });
-    }
-    pg.connect(connectionString, function(err, client) {
-        if(err) {
-            console.log(err.messgae);
-            return res.redirect('/home');
-        }
-        client.query('SELECT * FROM project_info($1)', [projectid], function(err, result) {
+    } else {
+        pg.connect(connectionString, function (err, client) {
             if (err) {
                 console.log(err.messgae);
                 return res.redirect('/home');
             }
-            if (result.rowCount > 0) {
-                var myproject = new Project({
-                    name: result.rows[0].pname,
-                    des: result.rows[0].des,
-                    owner: result.rows[0].ownerid,
-                    ownername: result.rows[0].ownername,
-                    startday: moment(result.rows[0].startdate).format('LL'),
-                    endday: moment(result.rows[0].enddate).format('LL'),
-                    teamname: result.rows[0].teamname,
-                    teamid: result.rows[0].teamid,
-                    projectid: projectid
-                });
-                if(myproject.endday == "Invalid date") {
-                    myproject.endday = "无期限";
+            client.query('SELECT * FROM project_info($1)', [projectid], function (err, result) {
+                if (err) {
+                    console.log(err.messgae);
+                    return res.redirect('/home');
                 }
-                client.query('SELECT * FROM project_user($1)', [projectid], function(err, result) {
-                    if(err) {
-                        console.log(err.message);
-                        return res.redirect('/home');
+                if (result.rowCount > 0) {
+                    var myproject = new Project({
+                        name: result.rows[0].pname,
+                        des: result.rows[0].des,
+                        owner: result.rows[0].ownerid,
+                        ownername: result.rows[0].ownername,
+                        startday: moment(result.rows[0].startdate).format('LL'),
+                        endday: moment(result.rows[0].enddate).format('LL'),
+                        teamname: result.rows[0].teamname,
+                        teamid: result.rows[0].teamid,
+                        projectid: projectid
+                    });
+                    if (myproject.endday == "Invalid date") {
+                        myproject.endday = "无期限";
                     }
-                    if(result.rowCount > 0) {
-                        var users = [];
-                        for(var i =0;i<result.rowCount;i++) {
-                            var user = {
-                                name: result.rows[i].username,
-                                uid: result.rows[i].uid,
-                                loginname: result.rows[i].loginname
-                            };
-                            users.push(user);
+                    client.query('SELECT * FROM project_user($1)', [projectid], function (err, result) {
+                        if (err) {
+                            console.log(err.message);
+                            return res.redirect('/home');
                         }
-                        client.query('SELECT * FROM project_task_unfinished($1)', [projectid], function(err, result) {
-                            if(err) {
-                                console.log(err.message);
-                                return res.redirect('/home');
+                        if (result.rowCount > 0) {
+                            var users = [];
+                            for (var i = 0; i < result.rowCount; i++) {
+                                var user = {
+                                    name: result.rows[i].username,
+                                    uid: result.rows[i].uid,
+                                    loginname: result.rows[i].loginname
+                                };
+                                users.push(user);
                             }
-                            console.log(result);
-                            var unfinishedtasks = [];
-                            for(var i=0;i<result.rowCount;i++) {
-                                var task = new Task({
-                                    name: result.rows[i].taskname,
-                                    des: result.rows[i].des,
-                                    startday: moment(result.rows[i].begindate).format('LL'),
-                                    endday: moment(result.rows[i].enddate).format('LL'),
-                                    projectname: myproject.name,
-                                    projectid: myproject.projectid,
-                                    remainday: result.rows[i].remainday,
-                                    taskid: result.rows[i].taskid,
-                                    complete: false
-                                });
-                                unfinishedtasks.push(task);
-                            }
-                            client.query('SELECT * FROM project_task_finished($1)', [projectid], function(err, result) {
-                                if(err) {
+                            client.query('SELECT * FROM project_task_unfinished($1)', [projectid], function (err, result) {
+                                if (err) {
                                     console.log(err.message);
                                     return res.redirect('/home');
                                 }
-                                var finishedtasks = [];
-                                for(var i=0;i<result.rowCount;i++) {
+                                console.log(result);
+                                var unfinishedtasks = [];
+                                for (var i = 0; i < result.rowCount; i++) {
                                     var task = new Task({
                                         name: result.rows[i].taskname,
                                         des: result.rows[i].des,
@@ -452,24 +432,45 @@ exports.project = function(req, res) {
                                         endday: moment(result.rows[i].enddate).format('LL'),
                                         projectname: myproject.name,
                                         projectid: myproject.projectid,
+                                        remainday: result.rows[i].remainday,
                                         taskid: result.rows[i].taskid,
-                                        complete: true
+                                        complete: false
                                     });
-                                    finishedtasks.push(task);
+                                    unfinishedtasks.push(task);
                                 }
-                                res.render('project', {title: '项目：'+myproject.name, user: req.session.user.truename, id: 'user', project: myproject, users:users, finishedtasks:finishedtasks, unfinishedtasks:unfinishedtasks});
+                                client.query('SELECT * FROM project_task_finished($1)', [projectid], function (err, result) {
+                                    if (err) {
+                                        console.log(err.message);
+                                        return res.redirect('/home');
+                                    }
+                                    var finishedtasks = [];
+                                    for (var i = 0; i < result.rowCount; i++) {
+                                        var task = new Task({
+                                            name: result.rows[i].taskname,
+                                            des: result.rows[i].des,
+                                            startday: moment(result.rows[i].begindate).format('LL'),
+                                            endday: moment(result.rows[i].enddate).format('LL'),
+                                            projectname: myproject.name,
+                                            projectid: myproject.projectid,
+                                            taskid: result.rows[i].taskid,
+                                            complete: true
+                                        });
+                                        finishedtasks.push(task);
+                                    }
+                                    res.render('project', {title: '项目：' + myproject.name, user: req.session.user.truename, id: 'user', project: myproject, users: users, finishedtasks: finishedtasks, unfinishedtasks: unfinishedtasks});
+                                });
                             });
-                        });
-                    } else {
-                        res.render('project', {title: '项目：'+myproject.name, user: req.session.user.truename, id: 'user', project: myproject,users:null,finishedtasks:null,unfinishedtasks:null});
-                    }
-                });
-            } else {
-                req.flash('error', '该项目不存在！');
-                res.redirect('/home');
-            }
+                        } else {
+                            res.render('project', {title: '项目：' + myproject.name, user: req.session.user.truename, id: 'user', project: myproject, users: null, finishedtasks: null, unfinishedtasks: null});
+                        }
+                    });
+                } else {
+                    req.flash('error', '该项目不存在！');
+                    res.redirect('/home');
+                }
+            });
         });
-    });
+    }
 };
 //client.connect(function(err, result) {
 //    if(err) {
