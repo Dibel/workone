@@ -17,21 +17,22 @@ block content
                 form.form-horizontal(method="post")
                     fieldset
                         div.form-group
-                            label.control-label(for="username") 用户名
-                            div.controls
+                            label.control-label.col-xs-3(for="username") 用户名
+                            div.col-xs-9
                                 input.form-control(type="text", id="username", name="username", placeholder="请输入用户名")
                         div.form-group
-                            label.control-label(for="name") 昵称
-                            div.controls
+                            label.control-label.col-xs-3(for="name") 昵称
+                            div.col-xs-9
                                 input.form-control(type="text", id="name", name="name", placeholder="请输入昵称")
                         div.form-group
-                            label.control-label(for="password") 密码
-                            div.controls
+                            label.control-label.col-xs-3(for="password") 密码
+                            div.col-xs-9
                                 input.form-control(type="password", id="password", name="password", placeholder="请输入密码")
                         div.form-group
-                            label.control-label(for="passwordrepeat") 重复输入密码
-                            div.controls
+                            label.control-label.col-xs-3(for="passwordrepeat") 重复输入密码
+                            div.col-xs-9
                                 input.form-control(type="password", id="passwordrepeat", name="passwordrepeat", placeholder="请重复输入密码")
                         div.from-actions
-                            input.btn.btn-primary(type="submit",value="注册")
-            div.col-md-4.column
+                            .col-xs-offset-3.col-xs-9
+                                input.btn.btn-primary(type="submit",value="注册")
+            div.col-md-3.column

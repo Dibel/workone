@@ -55,6 +55,8 @@ router.get('/team/:teamid', function(req, res) {
 
 router.get('/project/:projectid', db.project);
 
+router.post('/project/:projectid', db.newtask);
+
 router.get('/task/:taskid', db.task);
 
 router.post('/task/:taskid', db.discuss);

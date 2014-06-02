@@ -10,7 +10,7 @@ block content
                     h1=project.name
                         small 项目
                     div
-                        span='组建日期:'+project.startday+' 解散日期:'+project.endday+' 负责人:'+project.ownername
+                        span='组建日期:'+project.startday+'  解散日期:'+project.endday+'  负责人:'+project.ownername
                 .col-md-2.column
                         h3.text-primary.text-left
                             | 项目成员
@@ -23,32 +23,116 @@ block content
                 .col-md-8.column
                         h3.text-primary.text-left
                             | 任务
-                        ul.nav.nav-tabs(id='myTab', name='myTab')
+
+                        ul.nav.nav-tabs(id='myTab')
                             li.active
-                                a(href='#panel1', data-toggle='tab') 未结束
+                                a(href='#panel1', data-toggle='tab') 未完成
                             li
-                                a(href='#panel2', data-toggle='tab') 已结束
+                                a(href='#panel2', data-toggle='tab') 已完成
                         .tab-content
                           .tab-pane.fade.active.in(id='panel1')
-                              .panel.panel-info
+                           .panel
+                            -if(unfinishedtasks)
+                              -each task in unfinishedtasks
+                               -if (task.remainday < 0)
+                                .panel.panel-danger
+                                       .panel-heading
+                                           a.panel-title(href='/task/'+task.taskid)=task.name
+                                           | &nbsp;&nbsp;剩余天数:
+                                           =task.remainday
+                                       .panel-body
+                                           =task.des
+                                           div
+                                               br
+                                               div
+                                                   ='开始于:'+task.startday+' 截止于:'+task.endday
+                               -else
+                                .panel.panel-info
                                   .panel-heading
-                                      h3.panel-title
-                                          | 项目名 剩余时间
+                                      a.panel-title(href='/task/'+task.taskid)=task.name
+                                      | &nbsp;&nbsp;剩余天数:
+                                      =task.remainday
                                   .panel-body
-                                      | 描述
+                                      =task.des
                                       div
                                           br
                                           div
-                                              | 开始日期 / 结束日期
-                                  .panel-footer
-                                      | 项目负责人
-                          .tab-pane(id='panel2')
-                        script.
-                            $(function () {
-                                $('#myTab a:first').tab('show');//初始化显示哪个tab
-                                $('#myTab a').click(function (e) {
-                                     e.preventDefault();
-                                     $(this).tab('show');
-                                 })
-                            })
+                                              ='开始于:'+task.startday+' 截止于:'+task.endday
+                          .tab-pane.fade(id='panel2')
+                             .panel
+                              -if(finishedtasks)
+                                  -each task in finishedtasks
+                                          .panel.panel-info
+                                              .panel-heading
+                                                  a.panel-title(href='/task/'+task.taskid)=task.name
+                                              .panel-body
+                                                  =task.des
+                                                  div
+                                                      br
+                                                      div
+                                                          ='开始于:'+task.startday+' 截止于:'+task.endday
+                    button.btn.btn-primary.btn-lg(data-toggle='modal', data-target='#myModal')
+                        | 创建新任务
+                    #myModal.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel', aria-hidden='true')
+                        .modal-dialog
+                            .modal-content
+                                .modal-header
+                                    button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
+                                    h4#myModalLabel.modal-title 创建新任务
+                                .modal-body
+                                    form.form-horizontal(id='newtask', method='post')
+                                      fieldset
+                                        .form-group
+                                            label.control-label.col-xs-2(for="taskname") 任务名
+                                            .col-xs-10
+                                                input.form-control(type='text', id="taskname")
+                                        .form-group
+                                            label.control-label.col-xs-2(for="taskdes") 任务描述
+                                            .col-xs-10
+                                                input.form-control(type='text', id="taskdes")
+                                        .form-group
+                                            label.control-label.col-xs-2 截止日期
+                                            .col-xs-10(id='select')
+                                                .input-group.date
+                                                    input.form-control(type='text')
+                                                    span.input-group-addon
+                                                        i.glyphicon.glyphicon-th
+                                                script(type='text/javascript').
+                                                  $(".input-group.date").datepicker({
+                                                    todayBtn: "linked",
+                                                    language: "zh-CN",
+                                                    autoclose: true,
+                                                  });
+                                        .form-group
+                                            .list-group
+                                                a.list-group-item.active(href='#')
+                                                    | 选择参与者
+                                                    input.all.pull-right(title='toggle all', type='checkbox')
+                                                -if(users)
+                                                 -each user in users
+                                                    a.list-group-item(href='#', name='')
+                                                        =user.name+' @'+user.loginname
+                                                        input.pull-right(type='checkbox')
+                                                 script.
+                                                     $('.all').click(function(e){
+                                                         e.stopPropagation();
+                                                         var $this = $(this);
+                                                         if($this.is(":checked")) {
+                                                             $this.parents('.list-group').find("[type=checkbox]").prop("checked",true);
+                                                         }
+                                                         else {
+                                                             $this.parents('.list-group').find("[type=checkbox]").prop("checked",false);
+                                                             $this.prop("checked",false);
+                                                         }
+                                                     });
+                                .modal-footer
+                                        button.btn.btn-default(type='button', data-dismiss='modal') 关闭
+                                        button.btn.btn-primary(type='button', id='save', href='#') 创建任务
+                                script.
+                                    $('#save').on('click', function(e){
+                                    // We don't want this to act as a link so cancel the link action
+                                        e.preventDefault();
+                                    // Find form and submit it
+                                        $('#newtask').submit();
+                                    });
 

@@ -321,6 +321,9 @@ exports.discuss = function(req, res) {
     });
 };
 
+exports.newtask = function(req, res) {
+
+};
 exports.project = function(req, res) {
     var projectid = req.params.projectid;
     pg.connect(connectionString, function(err, client) {
@@ -359,7 +362,8 @@ exports.project = function(req, res) {
                         for(var i =0;i<result.rowCount;i++) {
                             var user = {
                                 name: result.rows[i].username,
-                                uid: result.rows[i].uid
+                                uid: result.rows[i].uid,
+                                loginname: result.rows[i].loginname
                             };
                             users.push(user);
                         }
@@ -368,13 +372,14 @@ exports.project = function(req, res) {
                                 console.log(err.message);
                                 return res.redirect('/home');
                             }
+                            console.log(result);
                             var unfinishedtasks = [];
                             for(var i=0;i<result.rowCount;i++) {
                                 var task = new Task({
                                     name: result.rows[i].taskname,
                                     des: result.rows[i].des,
-                                    startday: result.rows[i].startdate,
-                                    endday: result.rows[i].enddate,
+                                    startday: moment(result.rows[i].begindate).format('LL'),
+                                    endday: moment(result.rows[0].enddate).format('LL'),
                                     projectname: myproject.name,
                                     projectid: myproject.projectid,
                                     remainday: result.rows[i].remainday,
@@ -393,11 +398,10 @@ exports.project = function(req, res) {
                                     var task = new Task({
                                         name: result.rows[i].taskname,
                                         des: result.rows[i].des,
-                                        startday: result.rows[i].startdate,
-                                        endday: result.rows[i].enddate,
+                                        startday: moment(result.rows[i].begindate).format('LL'),
+                                        endday: moment(result.rows[0].enddate).format('LL'),
                                         projectname: myproject.name,
                                         projectid: myproject.projectid,
-                                        remainday: result.rows[i].remainday,
                                         taskid: result.rows[i].taskid,
                                         complete: true
                                     });
