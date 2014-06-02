@@ -1,0 +1,58 @@
+//
+   Created by Dibel on 2014/6/2.
+extends layout
+
+block content
+    div.container
+        .row.clearfix
+                button.btn.btn-info(type='button', onclick='javascript:history.go(-1);') 返回
+                .page-header
+                    h1=project.name
+                        small 项目
+                    div
+                        span='组建日期:'+project.startday+' 解散日期:'+project.endday+' 负责人:'+project.ownername
+                .col-md-2.column
+                        h3.text-primary.text-left
+                            | 项目成员
+                          ul
+                            li
+                                | 成员A
+                            li
+                                | 成员B
+                            li
+                                | ……
+                        h3.text-primary.text-left
+                            | 项目描述
+                        p=project.des
+                .col-md-8.column
+                        h3.text-primary.text-left
+                            | 任务
+                        ul.nav.nav-tabs(id='myTab', name='myTab')
+                            li.active
+                                a(href='#panel1', data-toggle='tab') 未结束
+                            li
+                                a(href='#panel2', data-toggle='tab') 已结束
+                        .tab-content
+                          .tab-pane.fade.active.in(id='panel1')
+                              .panel.panel-info
+                                  .panel-heading
+                                      h3.panel-title
+                                          | 项目名 剩余时间
+                                  .panel-body
+                                      | 描述
+                                      div
+                                          br
+                                          div
+                                              | 开始日期 / 结束日期
+                                  .panel-footer
+                                      | 项目负责人
+                          .tab-pane(id='panel2')
+                        script.
+                            $(function () {
+                                $('#myTab a:first').tab('show');//初始化显示哪个tab
+                                $('#myTab a').click(function (e) {
+                                     e.preventDefault();
+                                     $(this).tab('show');
+                                 })
+                            })
+

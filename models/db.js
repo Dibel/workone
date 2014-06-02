@@ -53,9 +53,12 @@ exports.login = function(req, res) {
                                 return res.redirect('/user');
                             }
                         });
+                    } else {
+                        req.flash('error', '密码不正确');
+                        return res.redirect('/login');
                     }
                 } else {
-                    req.flash('error', '密码不正确');
+                    req.flash('error', '用户不存在');
                     return res.redirect('/login');
                 }
             });
@@ -190,7 +193,6 @@ exports.user = function (req, res) {
                                     });
                                     myteams.push(myteam);
                                 }
-                                console.log(mytasks);
                                 res.render('user', {title: req.session.user.truename + '的主页', user: req.session.user.truename, id: 'user', teams: myteams, projects: myprojects, tasks: mytasks});
                             }
                         });
@@ -261,7 +263,6 @@ exports.task = function(req, res) {
                         return res.redirect('/home');
                     }
                     if(result.rowCount > 0) {
-                        console.log(result);
                         var myusers=[];
                         for(var i=0;i<result.rowCount;i++) {
                             var myuser = new User({
@@ -318,6 +319,43 @@ exports.discuss = function(req, res) {
             }
             console.log(result);
             return res.redirect(req.path);
+        });
+    });
+};
+
+exports.project = function(req, res) {
+    var projectid = req.params.projectid;
+    pg.connect(connectionString, function(err, client) {
+        if(err) {
+            console.log(err.messgae);
+            return res.redirect('/home');
+        }
+        client.query('SELECT * FROM project_info($1)', [projectid], function(err, result) {
+            if (err) {
+                console.log(err.messgae);
+                return res.redirect('/home');
+            }
+            if (result.rowCount > 0) {
+                var myproject = new Project({
+                    name: result.rows[0].pname,
+                    des: result.rows[0].des,
+                    owner: result.rows[0].ownerid,
+                    ownername: result.rows[0].ownername,
+                    startday: moment(result.rows[0].startdate).format('LL'),
+                    endday: moment(result.rows[0].enddate).format('LL'),
+                    teamname: result.rows[0].teamname,
+                    teamid: result.rows[0].teamid,
+                    projectid: projectid,
+                });
+                if(myproject.endday == "Invalid date") {
+                    myproject.endday = "无期限";
+                }
+                //client.query();
+                res.render('project', {title: '项目：'+myproject.name, user: req.session.user.truename, id: 'user', project: myproject});
+            } else {
+                req.flash('error', '该项目不存在！');
+                return res.redirect('/home');
+            }
         });
     });
 };
