@@ -66,7 +66,16 @@ block content
                                           .col-md-10
                                               =task.des
                                           .col-md-2
-                                              button.btn.btn-success(type='button', id='complete', href='#') 完成
+                                            form(id='completetask', hidden='true', method='get')
+                                                input.form-control(type='text', hidden='true', id="taskid", name="taskid", value=task.taskid)
+                                            button.btn.btn-success(type='button', id='complete', href='#') 完成
+                                            script.
+                                                    $('#complete').on('click', function(e){
+                                                    // We don't want this to act as a link so cancel the link action
+                                                        e.preventDefault();
+                                                    // Find form and submit it
+                                                        $('#completetask').submit();
+                                                    });
                                           div
                                               ='开始于:'+task.startday+' 截止于:'+task.endday
                           .tab-pane.fade(id='panel2')

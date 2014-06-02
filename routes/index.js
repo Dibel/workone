@@ -18,7 +18,11 @@ router.get('/home', function(req, res) {
 router.get('/user', db.user);
 
 router.get('/about', function(req, res) {
-    res.render('about', { title: '关于WorkOne', id: 'about', user: req.session.user.truename });
+    if(req.session.user) {
+        res.render('about', { title: '关于WorkOne', id: 'about', user: req.session.user.truename });
+    } else {
+        res.render('about', { title: '关于WorkOne', id: 'about'});
+    }
 });
 
 router.get('/login', function(req, res) {
