@@ -41,11 +41,21 @@ block content
                                            | &nbsp;&nbsp;剩余天数:
                                            =task.remainday
                                        .panel-body
-                                           =task.des
+                                            .col-md-10
+                                                =task.des
+                                            .col-md-2
+                                                form(id='completetask', hidden='true', method='get')
+                                                    input.form-control(type='text', hidden='true', id="taskid", name="taskid", value=task.taskid)
+                                                button.btn.btn-success(type='button', id='complete', href='#') 完成
+                                                script.
+                                                    $('#complete').on('click', function(e){
+                                                    // We don't want this to act as a link so cancel the link action
+                                                        e.preventDefault();
+                                                    // Find form and submit it
+                                                        $('#completetask').submit();
+                                                    });
                                            div
-                                               br
-                                               div
-                                                   ='开始于:'+task.startday+' 截止于:'+task.endday
+                                                ='开始于:'+task.startday+' 截止于:'+task.endday
                                -else
                                 .panel.panel-info
                                   .panel-heading
@@ -53,9 +63,10 @@ block content
                                       | &nbsp;&nbsp;剩余天数:
                                       =task.remainday
                                   .panel-body
-                                      =task.des
-                                      div
-                                          br
+                                          .col-md-10
+                                              =task.des
+                                          .col-md-2
+                                              button.btn.btn-success(type='button', id='complete', href='#') 完成
                                           div
                                               ='开始于:'+task.startday+' 截止于:'+task.endday
                           .tab-pane.fade(id='panel2')
@@ -99,8 +110,9 @@ block content
                                                         i.glyphicon.glyphicon-th
                                                 script(type='text/javascript').
                                                   $(".input-group.date").datepicker({
-                                                    todayBtn: "linked",
+                                                    format: "yyyy-mm-dd",
                                                     language: "zh-CN",
+                                                    todayBtn: "linked",
                                                     autoclose: true
                                                   });
                                         .form-group
@@ -112,7 +124,7 @@ block content
                                                  -each user in users
                                                     a.list-group-item(href='#')
                                                         =user.name+' @'+user.loginname
-                                                        input.pull-right(type='checkbox', name=user.id)
+                                                        input.pull-right(type='checkbox', name=user.uid)
                                                  script.
                                                      $('.all').click(function(e){
                                                          e.stopPropagation();

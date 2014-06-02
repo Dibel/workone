@@ -322,15 +322,61 @@ exports.discuss = function(req, res) {
 };
 
 exports.newtask = function(req, res) {
-    console.log(req.body);
+    var projectid = req.params.projectid;
+    var i = 3;
     var taskname = req.body.taskname;
+    if(taskname == null) {
+        req.flash('err', '未输入项目名');
+        return res.redirect(req.path);
+    }
     var taskdes = req.body.taskdes;
+    if(taskdes == null) {
+        i = 2;
+    }
     var date = req.body.date;
+    if(date == null) {
+        req.flash('err', '未输入日期');
+        return res.redirect(req.path);
+    }
     var arr = Object.keys(req.body);
     console.log(arr);
+    for(var j = 0;j<i;j++) {
+        arr.pop();
+    }
+    console.log(arr);
+    pg.connect(connectionString, function(err, client) {
+        if(err) {
+            console.log(err.messgae);
+            return res.redirect('/home');
+        }
+        client.query('SELECT * FROM newtask($1,$2,$3,$4,$5)', [projectid, taskname,moment().format('L'),date, taskdes], function(err, result) {
+            if(err) {
+                console.log(err.messgae);
+                return res.redirect(req.path);
+            }
+            console.log(result);
+            var taskid = result.rows[0].newtask;
+            for(var i =0;i<arr.length;i++) {
+                client.query('SELECT * FROM new_usertotask($1,$2)', [taskid, arr[i]]);
+            }
+            return res.redirect(req.path);
+        });
+    });
 };
 exports.project = function(req, res) {
     var projectid = req.params.projectid;
+    if(req.query.taskid) {
+        var taskid = req.query.taskid;
+        pg.connect(connectionString, function(err ,client) {
+            if(err) {
+                console.log(err.message);
+                return res.redirect(req.path);
+            }
+            client.query('UPDATE "Task" SET "COMPLETE"=true WHERE "ID"=$1', [taskid], function(err, result) {
+                return res.redirect('/project/'+projectid);
+            });
+        });
+    }
     pg.connect(connectionString, function(err, client) {
         if(err) {
             console.log(err.messgae);
@@ -362,7 +408,6 @@ exports.project = function(req, res) {
                         return res.redirect('/home');
                     }
                     if(result.rowCount > 0) {
-                        console.log(result);
                         var users = [];
                         for(var i =0;i<result.rowCount;i++) {
                             var user = {
