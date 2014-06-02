@@ -14,16 +14,18 @@ block content
                         li.nav-header.disabled
                            h3 我的小组&项目
                              //- if(typeof(team) !== 'undefined')
-                        -each team in teams
-                         li.active
+                        -if (teams != null)
+                         -each team in teams
+                          li.active
                            a(href='/team/'+'#{team.teamid}')= team.name
-                         -each project in team.projects
-                          li
-                           a(href='/project/'+'#{project.projectid}')= project.name
+                          -each project in team.projects
+                           li
+                            a(href='/project/'+'#{project.projectid}')= project.name
                 .col-md-6.column
                     h3 我的任务
                     .panel-group
-                      -each task in tasks
+                      -if(tasks != null)
+                       -each task in tasks
                         -if (task.remainday < 0)
                           .panel.panel-danger
                              .panel-heading

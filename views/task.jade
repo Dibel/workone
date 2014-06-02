@@ -24,7 +24,8 @@ block content
                 .col-md-2.column
                     h3.text-primary.text-left
                         | 任务成员
-                    -each user in users
+                    -if(users != null)
+                     -each user in users
                       h4=user.name
                     h3.text-primary.text-left
                         | 任务描述

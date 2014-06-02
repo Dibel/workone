@@ -22,51 +22,45 @@ exports.login = function(req, res) {
         password = crypto.createHash('md5').update(password).digest('hex');
         //client.connect();
         pg.connect(connectionString, function(err, client) {
-            var query = client.query('SELECT * FROM user_password_name($1);', [name]);
-            query.on('error', function(err) {
-                console.log(err.message);
-                return res.redirect('/login');
-            });
-            query.on('row', function(row, result) {
-                result.addRow(row);
-            });
-            query.on('end', function(result) {
+            client.query('SELECT * FROM user_password_name($1);', [name],function(err, result) {
+                if(err) {
+                    console.log(err.message);
+                    return res.redirect('/login');
+                }
                 if(result.rowCount > 0) {
                     if(result.rows[0].user_password_name == password) {
-                        var query1 = client.query('SELECT "ID","NAME" FROM "User" WHERE "LOGINNAME"=$1', [name]);
-                        query1.on('error', function(err) {
-                            console.log(err.message);
-                            return res.redirect('/login');
-                        });
-                        query1.on('row', function(row, result) {
-                            result.addRow(row);
-                        });
-                        query1.on('end', function(result) {
-                            if(result.rowCount > 0) {
-                                var uid = result.rows[0].ID.toString();
-                                var truename = result.rows[0].NAME;
-                                req.session.user = new User({
-                                    name: name,
-                                    uid: uid,
-                                    truename: truename
-                                });
-                                return res.redirect('/user');
+                        client.query('SELECT "ID","NAME" FROM "User" WHERE "LOGINNAME"=$1', [name], function(err,result1) {
+                            if(err) {
+                                console.log(err.message);
+                                return res.redirect('/login');
                             }
+                                if(result1.rowCount > 0) {
+                                    console.log(result1);
+                                    var uid = result1.rows[0].ID.toString();
+                                    var truename = result1.rows[0].NAME;
+                                    req.session.user = new User({
+                                        name: name,
+                                        uid: uid,
+                                        truename: truename
+                                    });
+                                    res.redirect('/user');
+                                }
                         });
+
                     } else {
                         req.flash('error', '密码不正确');
-                        return res.redirect('/login');
+                        res.redirect('/login');
                     }
                 } else {
                     req.flash('error', '用户不存在');
-                    return res.redirect('/login');
+                    res.redirect('/login');
                 }
             });
         });
 
     } else {
         req.flash('error', '未输入用户名或密码');
-        return res.redirect('/login');
+        res.redirect('/login');
     }
 };
 
@@ -93,7 +87,7 @@ exports.register = function(req, res) {
             query.on('error', function(err) {
                 console.log(err.message);
                 req.flash('error', '该用户已存在！');
-                return res.redirect('/register');
+                res.redirect('/register');
             });
             query.on('row', function(row, result) {
                 result.addRow(row);
@@ -108,17 +102,17 @@ exports.register = function(req, res) {
                             uid: result.rows[0].ID,
                             truename: truename
                     });
-                    return res.redirect('/user');
+                    res.redirect('/user');
                 } else {
                     req.flash('error', '该用户已存在！');
-                    return res.redirect('/register');
+                    res.redirect('/register');
                 }
             });
         });
 
     } else {
         req.flash('error', '未输入用户名或密码');
-        return res.redirect('/register');
+        res.redirect('/register');
     }
 };
 
@@ -196,8 +190,12 @@ exports.user = function (req, res) {
                                 res.render('user', {title: req.session.user.truename + '的主页', user: req.session.user.truename, id: 'user', teams: myteams, projects: myprojects, tasks: mytasks});
                             }
                         });
+                    } else {
+                        res.render('user', {title: req.session.user.truename + '的主页', user: req.session.user.truename, id: 'user', teams: null, projects: null, tasks: mytasks});
                     }
                 });
+            } else {
+                res.render('user', {title: req.session.user.truename + '的主页', user: req.session.user.truename, id: 'user', teams: null, projects: null, tasks: null});
             }
         });
 //        query.on('error', function(err) {
@@ -298,7 +296,7 @@ exports.task = function(req, res) {
                 //console.log(result);
             } else {
                 req.flash('error', '该任务不存在！');
-                return res.redirect('/home');
+                res.redirect('/home');
             }
         });
     });
@@ -345,16 +343,76 @@ exports.project = function(req, res) {
                     endday: moment(result.rows[0].enddate).format('LL'),
                     teamname: result.rows[0].teamname,
                     teamid: result.rows[0].teamid,
-                    projectid: projectid,
+                    projectid: projectid
                 });
                 if(myproject.endday == "Invalid date") {
                     myproject.endday = "无期限";
                 }
-                //client.query();
-                res.render('project', {title: '项目：'+myproject.name, user: req.session.user.truename, id: 'user', project: myproject});
+                client.query('SELECT * FROM project_user($1)', [projectid], function(err, result) {
+                    if(err) {
+                        console.log(err.message);
+                        return res.redirect('/home');
+                    }
+                    if(result.rowCount > 0) {
+                        console.log(result);
+                        var users = [];
+                        for(var i =0;i<result.rowCount;i++) {
+                            var user = {
+                                name: result.rows[i].username,
+                                uid: result.rows[i].uid
+                            };
+                            users.push(user);
+                        }
+                        client.query('SELECT * FROM project_task_unfinished($1)', [projectid], function(err, result) {
+                            if(err) {
+                                console.log(err.message);
+                                return res.redirect('/home');
+                            }
+                            var unfinishedtasks = [];
+                            for(var i=0;i<result.rowCount;i++) {
+                                var task = new Task({
+                                    name: result.rows[i].taskname,
+                                    des: result.rows[i].des,
+                                    startday: result.rows[i].startdate,
+                                    endday: result.rows[i].enddate,
+                                    projectname: myproject.name,
+                                    projectid: myproject.projectid,
+                                    remainday: result.rows[i].remainday,
+                                    taskid: result.rows[i].taskid,
+                                    complete: false
+                                });
+                                unfinishedtasks.push(task);
+                            }
+                            client.query('SELECT * FROM project_task_finished($1)', [projectid], function(err, result) {
+                                if(err) {
+                                    console.log(err.message);
+                                    return res.redirect('/home');
+                                }
+                                var finishedtasks = [];
+                                for(var i=0;i<result.rowCount;i++) {
+                                    var task = new Task({
+                                        name: result.rows[i].taskname,
+                                        des: result.rows[i].des,
+                                        startday: result.rows[i].startdate,
+                                        endday: result.rows[i].enddate,
+                                        projectname: myproject.name,
+                                        projectid: myproject.projectid,
+                                        remainday: result.rows[i].remainday,
+                                        taskid: result.rows[i].taskid,
+                                        complete: true
+                                    });
+                                    finishedtasks.push(task);
+                                }
+                                res.render('project', {title: '项目：'+myproject.name, user: req.session.user.truename, id: 'user', project: myproject, users:users, finishedtasks:finishedtasks, unfinishedtasks:unfinishedtasks});
+                            });
+                        });
+                    } else {
+                        res.render('project', {title: '项目：'+myproject.name, user: req.session.user.truename, id: 'user', project: myproject,users:null,finishedtasks:null,unfinishedtasks:null});
+                    }
+                });
             } else {
                 req.flash('error', '该项目不存在！');
-                return res.redirect('/home');
+                res.redirect('/home');
             }
         });
     });

@@ -14,13 +14,9 @@ block content
                 .col-md-2.column
                         h3.text-primary.text-left
                             | 项目成员
-                          ul
-                            li
-                                | 成员A
-                            li
-                                | 成员B
-                            li
-                                | ……
+                        -if(users != null)
+                            -each user in users
+                                h4=user.name
                         h3.text-primary.text-left
                             | 项目描述
                         p=project.des
