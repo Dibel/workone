@@ -7,11 +7,11 @@ var moment = require('moment');
 moment.lang('zh-cn');
 //var connectionString = "postgres://myuser:123456@ipv6.dibel.ml/mydb";
 var connectionString = "postgres://myuser:123456@localhost/mydb";
-var Discuss = require('./Discuss');
-var Team = require('./Team');
-var Project = require('./Project');
-var Task = require('./Task');
-var User = require('./User');
+var Discuss = require('./discuss.js');
+var Team = require('./team.js');
+var Project = require('./project.js');
+var Task = require('./task.js');
+var User = require('./user.js');
 
 //var client = new pg.Client(connectionString);
 
