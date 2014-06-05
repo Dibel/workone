@@ -1,0 +1,140 @@
+extends layout
+block content
+  .container
+    .row.clearfix
+        .col-md-12.column
+            button.btn.btn-info(type='button', onclick='javascript:history.go(-1);') 返回
+            .page-header
+                h1=team.name
+                    small=team.des
+                div
+                    span.label.label-default(style='margin-left:5px')='组建日期: '+team.startday
+                    span.label.label-default(style='margin-left:5px')='解散日期: '+team.endday
+                    span.label.label-default(style='margin-left:5px')='负责人: '+team.ownername
+            .row.clearfix
+                .col-md-2.column
+                    h3.text-left
+                        | 团队成员
+                    ul
+                        -if(users != null)
+                            -each user in users
+                                h4=user.name
+                .col-md-8.column
+                    h3.text-left
+                        | 项目
+                    .tabbable
+                        ul.nav.nav-tabs
+                            li.active
+                                a(href='#panel1', data-toggle='tab') 未结束
+                            li
+                                a(href='#panel2', data-toggle='tab') 已结束
+                        .tab-content
+                            .tab-pane.fade.active.in(id='panel1')
+                                .panel
+                                    -if(unfinishedprojects)
+                                        -each project in unfinishedprojects
+                                            -if (project.remainday < 0)
+                                                .panel.panel-danger
+                                                    .panel-heading
+                                                        a.panel-title(href='/project/'+project.id)=project.name
+                                                        | &nbsp;&nbsp;剩余天数:
+                                                        =project.remainday
+                                                    .panel-body
+                                                        =project.des
+                                                        div
+                                                            br
+                                                            div
+                                                                ='开始于:'+project.startday+' 截止于:'+project.endday
+                                            -else
+                                                .panel.panel-info
+                                                    .panel-heading
+                                                        a.panel-title(href='/project/'+project.id)=project.name
+                                                        | &nbsp;&nbsp;剩余天数:
+                                                        =project.remainday
+                                                    .panel-body
+                                                        =project.des
+                                                        div
+                                                            br
+                                                            div
+                                                                ='开始于:'+project.startday+' 截止于:'+project.endday
+                            .tab-pane.fade(id='panel2')
+                                .panel
+                                    -if(finishedprojects)
+                                        -each project in finishedprojects
+                                            .panel.panel-info
+                                                .panel-heading
+                                                    a.panel-title(href='/project/'+project.id)=project.name
+                                                .panel-body
+                                                    =project.des
+                                                    div
+                                                        br
+                                                        div
+                                                            ='开始于:'+project.startday+' 截止于:'+project.endday
+                .col-md-2.column
+                    button.btn.btn-primary.btn-lg(data-toggle='modal', data-target='#myModal')
+                        | 创建新项目
+                    #myModal.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel', aria-hidden='true')
+                        .modal-dialog
+                            .modal-content
+                                .modal-header
+                                    button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
+                                    h4#myModalLabel.modal-title 创建新项目
+                                .modal-body
+                                    form.form-horizontal(id='newproject', method='post', action='/post_newproject')
+                                        fieldset
+                                            .form-group
+                                                label.control-label.col-xs-2(for="projectname") 项目名
+                                                .col-xs-10
+                                                    input.form-control(type='text', id="projectname", name="projectname")
+                                            .form-group
+                                                label.control-label.col-xs-2(for="projectdes") 项目描述
+                                                .col-xs-10
+                                                    input.form-control(type='text', id="projectdes", name="projectdes")
+                                            .form-group
+                                                label.control-label.col-xs-2 截止日期
+                                                .col-xs-10(id='select')
+                                                    .input-group.date
+                                                        input.form-control(type='text',id='date', name='date')
+                                                        span.input-group-addon
+                                                            i.glyphicon.glyphicon-th
+                                                    script(type='text/javascript').
+                                                        $(".input-group.date").datepicker({
+                                                            format: "yyyy-mm-dd",
+                                                            language: "zh-CN",
+                                                            todayBtn: "linked",
+                                                            autoclose: true
+                                                        });
+                                            .form-group
+                                                .list-group
+                                                    a.list-group-item.active(href='#')
+                                                        | 选择参与者
+                                                        input.all.pull-right(title='toggle all', type='checkbox')
+                                                    -if(users)
+                                                        -each user in users
+                                                            a.list-group-item(href='#')
+                                                                =user.name+' @'+user.loginname
+                                                                input.pull-right(type='checkbox', name=user.uid)
+                                                        script.
+                                                            $('.all').click(function(e){
+                                                                e.stopPropagation();
+                                                                var $this = $(this);
+                                                                if($this.is(":checked")) {
+                                                                    $this.parents('.list-group').find("[type=checkbox]").prop("checked",true);
+                                                                }
+                                                                else {
+                                                                    $this.parents('.list-group').find("[type=checkbox]").prop("checked",false);
+                                                                    $this.prop("checked",false);
+                                                                }
+                                                            });
+                                        input.form-control.hidden(type='text', id="userid", name="userid", value=team.ownerid)
+                                        input.form-control.hidden(type='text', id="teamid", name="teamid", value=team.teamid)
+                                .modal-footer
+                                    button.btn.btn-default(type='button', data-dismiss='modal') 关闭
+                                    button.btn.btn-primary(type='button', id='save', href='#') 创建任务
+                                script.
+                                    $('#save').on('click', function(e){
+                                    // We don't want this to act as a link so cancel the link action
+                                        e.preventDefault();
+                                    // Find form and submit it
+                                        $('#newproject').submit();
+                                    });

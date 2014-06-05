@@ -6,7 +6,8 @@ var crypto = require('crypto');
 var moment = require('moment');
 moment.lang('zh-cn');
 //var connectionString = "postgres://myuser:123456@ipv6.dibel.ml/mydb";
-var connectionString = "postgres://myuser:123456@localhost/mydb";
+var connectionString = "postgres://myuser:123456@vpn.dibel.ml/mydb";
+//var connectionString = "postgres://myuser:123456@localhost/mydb";
 var Discuss = require('./discuss.js');
 var Team = require('./team.js');
 var Project = require('./project.js');
@@ -372,7 +373,8 @@ exports.project = function(req, res) {
                 console.log(err.message);
                 return res.redirect(req.path);
             }
-            client.query('UPDATE "Task" SET "COMPLETE"=true WHERE "ID"=$1', [taskid], function(err, result) {
+            client.query('SELECT * FROM updatecomplete($1)', [taskid], function(err, result) {
+                console.log(result);
                 return res.redirect('/project/'+projectid);
             });
         });
@@ -422,7 +424,6 @@ exports.project = function(req, res) {
                                     console.log(err.message);
                                     return res.redirect('/home');
                                 }
-                                console.log(result);
                                 var unfinishedtasks = [];
                                 for (var i = 0; i < result.rowCount; i++) {
                                     var task = new Task({
@@ -471,6 +472,159 @@ exports.project = function(req, res) {
             });
         });
     }
+};
+
+exports.team = function(req, res) {
+    var teamid = req.params.teamid;
+    pg.connect(connectionString, function (err, client) {
+        if (err) {
+            console.log(err.messgae);
+            return res.redirect('/home');
+        }
+        client.query('SELECT * FROM team_info($1)', [teamid], function (err, result) {
+            if (err) {
+                console.log(err.messgae);
+                return res.redirect('/home');
+            }
+            if (result.rowCount > 0) {
+                //console.log(result);
+                var team = new Team({
+                    name: result.rows[0].teamname,
+                    des: result.rows[0].des,
+                    ownername: result.rows[0].ownername,
+                    ownerid:  result.rows[0].ownerid,
+                    startday: moment(result.rows[0].startdate).format('LL'),
+                    endday: moment(result.rows[0].enddate).format('LL'),
+                    teamid: teamid
+                });
+                if (team.endday == null) {
+                    team.endday = "无期限";
+                }
+                if (team.ownername == null) {
+                    team.ownername = "无";
+                }
+                client.query('SELECT * FROM team_user($1)', [teamid], function (err, result) {
+                    // console.log(result);
+                    if (err) {
+                        console.log(err.message);
+                        return res.redirect('/home');
+                    }
+                    if (result.rowCount > 0) {
+                        //console.log(result);
+                        var users = [];
+                        for (var i = 0; i < result.rowCount; i++) {
+                            var user = {
+                                name: result.rows[i].username,
+                                uid: result.rows[i].userid
+                            };
+                            users.push(user);
+                        }
+                        client.query('SELECT * FROM team_project_unfinished($1)', [teamid], function (err, result) {
+                            if (err) {
+                                console.log(err.message);
+                                return res.redirect('/home');
+                            }
+                            //console.log(result);
+                            var unfinishedprojects = [];
+                            for (var i = 0; i < result.rowCount; i++) {
+                                var project = new Project({
+                                    name: result.rows[i].proname,
+                                    id: result.rows[i].proid,
+                                    des: result.rows[i].prodes,
+                                    startday: result.rows[i].probegin,
+                                    endday: result.rows[i].proend,
+                                    remainday: result.rows[i].remainday,
+                                    owner: result.rows[i].owner,
+                                    ownerid: result.rows[i].ownerid
+                                });
+                                unfinishedprojects.push(project);
+                            }
+                            client.query('SELECT * FROM team_project_finished($1)', [teamid], function (err, result) {
+                                if (err) {
+                                    console.log(err.message);
+                                    return res.redirect('/home');
+                                }
+                                console.log(result);
+                                var finishedprojects = [];
+                                for (var i = 0; i < result.rowCount; i++) {
+                                    var project = new Project({
+                                        name: result.rows[i].proname,
+                                        id: result.rows[i].proid,
+                                        des: result.rows[i].prodes,
+                                        startday: result.rows[i].probegin,
+                                        endday: result.rows[i].proend,
+                                        duration: result.rows[i].duration,
+                                        owner: result.rows[i].owner,
+                                        ownerid: result.rows[i].ownerid
+                                    });
+                                    finishedprojects.push(project);
+                                }
+                                res.render('team', {title: '项目：'+team.name, user: req.session.user.truename, id: 'user', team: team, users:users, finishedprojects:finishedprojects, unfinishedprojects:unfinishedprojects});
+                            });
+                        });
+                    }else{
+                        res.render('team', {title: '项目：'+team.name, user: req.session.user.truename, id: 'user', team: team, users:null, finishedprojects:null, unfinishedprojects:null});
+                    }
+                });
+            } else {
+                req.flash('error', '该团队不存在！');
+                res.redirect('/home');
+            }
+        });
+    });
+};
+
+exports.newproject = function(req, res){
+    // var content=req.body.discuss;
+    //var taskid=req.body.taskid;
+    console.log("mark");
+    var i = 5;
+
+    var arr = Object.keys(req.body);
+    console.log(arr);
+    if(req.body.projectdes == null) {
+        i = 4;
+    }
+    for(var j = 0;j<i;j++) {
+        arr.pop();
+    }
+    console.log(arr);
+    pg.connect(connectionString, function(err, client) {
+        if(err) {
+            console.log(err.messgae);
+            return res.redirect('/home');
+        }
+        //TODO
+        /*
+         console.log(req.body.userid);
+         console.log(req.body.teamid);
+         console.log(req.body.projectname);
+         console.log(req.body.projectdes);
+         console.log(moment().format('L'));
+         console.log(req.body.date);
+         */
+        client.query('SELECT * FROM newproject($1,$2,$3,$4,$5,$6)', [req.body.userid,req.body.teamid,req.body.projectname,moment().format('L'),req.body.date,req.body.projectdes],function(err, result) {
+            if(err) {
+                console.log(err.messgae);
+                //   console.log("1");
+                return res.redirect('/team/'+req.body.teamid);
+            }
+            console.log("1");
+            console.log(result);
+            console.log("2");
+
+            var pid = result.rows[0].newproject;
+            console.log(pid);
+            for(var i =0;i<arr.length;i++) {
+                if (arr[i] != req.body.userid) {
+                    client.query('SELECT * FROM new_usertoproject($1,$2)', [pid, arr[i]]);
+
+                }
+            }
+            //    console.log("2");
+            return res.redirect('/team/'+req.body.teamid);
+        });
+    });
 };
 //client.connect(function(err, result) {
 //    if(err) {

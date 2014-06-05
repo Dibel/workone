@@ -53,9 +53,8 @@ router.get('/logout', function(req, res) {
    }
 });
 
-router.get('/team/:teamid', function(req, res) {
-    res.send('group:'+req.params.teamid);
-});
+router.get('/team/:teamid', db.team);
+
 
 router.get('/project/:projectid', db.project);
 
@@ -64,5 +63,7 @@ router.post('/project/:projectid', db.newtask);
 router.get('/task/:taskid', db.task);
 
 router.post('/task/:taskid', db.discuss);
+
+router.post('/post_newproject', db.newproject);
 
 module.exports = router;

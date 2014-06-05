@@ -87,7 +87,12 @@ block content
                                               .panel-heading
                                                   a.panel-title(href='/task/'+task.taskid)=task.name
                                               .panel-body
-                                                  =task.des
+                                                  .col-md-10
+                                                      =task.des
+                                                  .col-md-2
+                                                          form(id='completetask'+task.taskid, hidden='true', method='get')
+                                                              input.form-control(type='text', hidden='true', id="taskid", name="taskid", value=task.taskid)
+                                                          button.btn.btn-warning(type='button', id='uncomplete'+task.taskid, href='#', name=task.taskid) 撤消完成
                                                   div
                                                       br
                                                       div
