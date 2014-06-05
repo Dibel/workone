@@ -41,12 +41,17 @@ block content
                                            | &nbsp;&nbsp;剩余天数:
                                            =task.remainday
                                        .panel-body
-                                            .col-md-10
+                                            .col-md-8
                                                 =task.des
-                                            .col-md-2
+                                            .col-md-4
                                                 form(id='completetask'+task.taskid, hidden='true', method='get')
                                                     input.form-control(type='text', hidden='true', id="taskid", name="taskid", value=task.taskid)
                                                 button.btn.btn-success(type='button', id='uncomplete'+task.taskid, href='#', name=task.taskid) 完成
+                                                | &nbsp;
+                                                form(id='deletetask'+task.taskid, action='/delete_task' hidden='true', method='post')
+                                                    input.form-control(type='text', hidden='true', id="taskid", name="taskid", value=task.taskid)
+                                                    input.form-control(type='text', hidden='true', id="projectid", name="projectid", value=project.projectid)
+                                                button.btn.btn-danger(type='button', delete='delete', href='#', name=task.taskid) 删除
                                                 //script.
                                                     $('#uncomplete').on('click', function(e){
                                                     // We don't want this to act as a link so cancel the link action
@@ -64,19 +69,17 @@ block content
                                       | &nbsp;&nbsp;剩余天数:
                                       =task.remainday
                                   .panel-body
-                                          .col-md-10
+                                          .col-md-8
                                               =task.des
-                                          .col-md-2
+                                          .col-md-4
                                             form(id='completetask'+task.taskid, hidden='true', method='get')
                                                 input.form-control(type='text', hidden='true', id="taskid", name="taskid", value=task.taskid)
                                             button.btn.btn-success(type='button', id='complete', href='#', name=task.taskid) 完成
-                                            //script.
-                                                    $('#complete').on('click', function(e){
-                                                    // We don't want this to act as a link so cancel the link action
-                                                        e.preventDefault();
-                                                    // Find form and submit it
-                                                        $('#completetask').submit();
-                                                    });
+                                            | &nbsp;
+                                            form(id='deletetask'+task.taskid, action='/delete_task' hidden='true', method='post')
+                                                input.form-control(type='text', hidden='true', id="taskid", name="taskid", value=task.taskid)
+                                                input.form-control(type='text', hidden='true', id="projectid", name="projectid", value=project.projectid)
+                                            button.btn.btn-danger(type='button', delete='delete', href='#', name=task.taskid) 删除
                                           div
                                               ='开始于:'+task.startday+' 截止于:'+task.endday
                           .tab-pane.fade(id='panel2')
@@ -87,29 +90,43 @@ block content
                                               .panel-heading
                                                   a.panel-title(href='/task/'+task.taskid)=task.name
                                               .panel-body
-                                                  .col-md-10
+                                                  .col-md-8
                                                       =task.des
-                                                  .col-md-2
+                                                  .col-md-4
                                                           form(id='completetask'+task.taskid, hidden='true', method='get')
                                                               input.form-control(type='text', hidden='true', id="taskid", name="taskid", value=task.taskid)
-                                                          button.btn.btn-warning(type='button', id='uncomplete'+task.taskid, href='#', name=task.taskid) 撤消完成
+                                                          button.btn.btn-warning(type='button', id='uncomplete'+task.taskid, href='#', name=task.taskid) 重做
+                                                          | &nbsp;
+                                                          form(id='deletetask'+task.taskid, action='/delete_task' hidden='true', method='post')
+                                                           input.form-control(type='text', hidden='true', id="taskid", name="taskid", value=task.taskid)
+                                                           input.form-control(type='text', hidden='true', id="projectid", name="projectid", value=project.projectid)
+                                                          button.btn.btn-danger(type='button', delete='delete', href='#', name=task.taskid) 删除
                                                   div
-                                                      br
-                                                      div
                                                           ='开始于:'+task.startday+' 截止于:'+task.endday
                     script.
                         $("[href='#']").each(function() {
-                            var id=$(this).val('name');
-                            if(id == 'save') {
+                            var name=$(this).attr('name');
+                            if(name == 'save') {
                                 return;
                             }
-                            $(this).bind("click",function(e){
-                                e.preventDefault();
-                                var id=$(this).attr('name');
-                                console.log(id);
-                                var taskform='#completetask'+id.toString();
-                                $(taskform).submit();
-                            });
+                            var id = $(this).attr('delete');
+                            console.log(id);
+                            if(id == 'delete') {
+                                $(this).bind("click",function(e){
+                                    console.log($(this).attr('delete'));
+                                    e.preventDefault();
+                                    var id=$(this).attr('name');
+                                    var taskform='#deletetask'+id.toString();
+                                    $(taskform).submit();
+                                });
+                            } else {
+                                $(this).bind("click",function(e){
+                                    e.preventDefault();
+                                    var id=$(this).attr('name');
+                                    var taskform='#completetask'+id.toString();
+                                    $(taskform).submit();
+                                });
+                            }
                         });
                     button.btn.btn-primary.btn-lg(data-toggle='modal', data-target='#myModal')
                         | 创建新任务
@@ -134,7 +151,7 @@ block content
                                             label.control-label.col-xs-2 截止日期
                                             .col-xs-10(id='select')
                                                 .input-group.date
-                                                    input.form-control(type='text', id='date', name='date')
+                                                    input.form-control(type='text', id='date', name='date', readonly='readonly')
                                                     span.input-group-addon
                                                         i.glyphicon.glyphicon-th
                                                 script(type='text/javascript').

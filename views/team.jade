@@ -36,11 +36,17 @@ block content
                                             -if (project.remainday < 0)
                                                 .panel.panel-danger
                                                     .panel-heading
-                                                        a.panel-title(href='/project/'+project.id)=project.name
+                                                        a.panel-title(href='/project/'+project.projectid)=project.name
                                                         | &nbsp;&nbsp;剩余天数:
                                                         =project.remainday
-                                                    .panel-body
-                                                        =project.des
+                                                    .panel-
+                                                        .col-md-8
+                                                            =project.des
+                                                        .col-md-4
+                                                            form(id='deleteproject'+project.projectid, action='/delete_project' hidden='true', method='post')
+                                                                input.form-control(type='text', hidden='true', id="projectid", name="projectid", value=project.projectid)
+                                                                input.form-control(type='text', hidden='true', id="teamid", name="teamid", value=team.teamid)
+                                                            button.btn.btn-danger(type='button', delete='delete', href='#', name=project.projectid) 删除
                                                         div
                                                             br
                                                             div
@@ -48,11 +54,17 @@ block content
                                             -else
                                                 .panel.panel-info
                                                     .panel-heading
-                                                        a.panel-title(href='/project/'+project.id)=project.name
+                                                        a.panel-title(href='/project/'+project.projectid)=project.name
                                                         | &nbsp;&nbsp;剩余天数:
                                                         =project.remainday
                                                     .panel-body
-                                                        =project.des
+                                                        .col-md-8
+                                                            =project.des
+                                                        .col-md-4
+                                                            form(id='deleteproject'+project.projectid, action='/delete_project' hidden='true', method='post')
+                                                                input.form-control(type='text', hidden='true', id="projectid", name="projectid", value=project.projectid)
+                                                                input.form-control(type='text', hidden='true', id="teamid", name="teamid", value=team.teamid)
+                                                            button.btn.btn-danger(type='button', delete='delete', href='#', name=project.projectid) 删除
                                                         div
                                                             br
                                                             div
@@ -63,13 +75,32 @@ block content
                                         -each project in finishedprojects
                                             .panel.panel-info
                                                 .panel-heading
-                                                    a.panel-title(href='/project/'+project.id)=project.name
+                                                    a.panel-title(href='/project/'+project.projectid)=project.name
                                                 .panel-body
-                                                    =project.des
+                                                    .col-md-8
+                                                        =project.des
+                                                    .col-md-4
+                                                        form(id='deleteproject'+project.projectid, action='/delete_project' hidden='true', method='post')
+                                                            input.form-control(type='text', hidden='true', id="projectid", name="projectid", value=project.projectid)
+                                                            input.form-control(type='text', hidden='true', id="teamid", name="teamid", value=team.teamid)
+                                                        button.btn.btn-danger(type='button', delete='delete', href='#', name=project.projectid) 删除
                                                     div
                                                         br
                                                         div
                                                             ='开始于:'+project.startday+' 截止于:'+project.endday
+                    script.
+                        $("[href='#']").each(function() {
+                            var name=$(this).attr('id');
+                            if(name == 'save') {
+                                return;
+                            }
+                            $(this).bind("click",function(e){
+                                    e.preventDefault();
+                                    var id=$(this).attr('name');
+                                    var taskform='#deleteproject'+id.toString();
+                                    $(taskform).submit();
+                            });
+                        });
                 .col-md-2.column
                     button.btn.btn-primary.btn-lg(data-toggle='modal', data-target='#myModal')
                         | 创建新项目

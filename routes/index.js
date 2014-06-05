@@ -66,4 +66,8 @@ router.post('/task/:taskid', db.discuss);
 
 router.post('/post_newproject', db.newproject);
 
+router.post('/delete_task', db.deletetask);
+
+router.post('/delete_project', db.deleteproject);
+
 module.exports = router;

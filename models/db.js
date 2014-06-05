@@ -529,7 +529,7 @@ exports.team = function(req, res) {
                             for (var i = 0; i < result.rowCount; i++) {
                                 var project = new Project({
                                     name: result.rows[i].proname,
-                                    id: result.rows[i].proid,
+                                    projectid: result.rows[i].proid,
                                     des: result.rows[i].prodes,
                                     startday: result.rows[i].probegin,
                                     endday: result.rows[i].proend,
@@ -549,7 +549,7 @@ exports.team = function(req, res) {
                                 for (var i = 0; i < result.rowCount; i++) {
                                     var project = new Project({
                                         name: result.rows[i].proname,
-                                        id: result.rows[i].proid,
+                                        projectid: result.rows[i].proid,
                                         des: result.rows[i].prodes,
                                         startday: result.rows[i].probegin,
                                         endday: result.rows[i].proend,
@@ -625,6 +625,42 @@ exports.newproject = function(req, res){
             return res.redirect('/team/'+req.body.teamid);
         });
     });
+};
+
+exports.deletetask = function(req, res) {
+    if(req.body.taskid != null) {
+        pg.connect(connectionString, function(err, client) {
+            if(err) {
+                console.log(err.messgae);
+                return res.redirect('/home');
+            }
+            client.query('SELECT * FROM deletetask($1)', [req.body.taskid], function (err, result) {
+                if(err) {
+                    console.log(err.message);
+                    return res.redirect('/project/'+req.body.projectid);
+                }
+                return res.redirect('/project/'+req.body.projectid);
+            });
+        });
+    }
+};
+
+exports.deleteproject = function(req, res) {
+    if(req.body.projectid != null) {
+        pg.connect(connectionString, function(err, client) {
+            if(err) {
+                console.log(err.messgae);
+                return res.redirect('/home');
+            }
+            client.query('SELECT * FROM deleteproject($1)', [req.body.projectid], function (err, result) {
+                if(err) {
+                    console.log(err.message);
+                    return res.redirect('/team/'+req.body.teamid);
+                }
+                return res.redirect('/team/'+req.body.teamid);
+            });
+        });
+    }
 };
 //client.connect(function(err, result) {
 //    if(err) {
