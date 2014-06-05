@@ -537,7 +537,8 @@ exports.team = function(req, res) {
                         for (var i = 0; i < result.rowCount; i++) {
                             var user = {
                                 name: result.rows[i].username,
-                                uid: result.rows[i].userid
+                                uid: result.rows[i].userid,
+                                loginname: result.rows[i].loginname
                             };
                             users.push(user);
                         }
@@ -553,8 +554,8 @@ exports.team = function(req, res) {
                                     name: result.rows[i].proname,
                                     projectid: result.rows[i].proid,
                                     des: result.rows[i].prodes,
-                                    startday: result.rows[i].probegin,
-                                    endday: result.rows[i].proend,
+                                    startday: moment(result.rows[i].probegin).format('LL'),
+                                    endday: moment(result.rows[i].proend).format('LL'),
                                     remainday: result.rows[i].remainday,
                                     owner: result.rows[i].owner,
                                     ownerid: result.rows[i].ownerid
@@ -573,8 +574,8 @@ exports.team = function(req, res) {
                                         name: result.rows[i].proname,
                                         projectid: result.rows[i].proid,
                                         des: result.rows[i].prodes,
-                                        startday: result.rows[i].probegin,
-                                        endday: result.rows[i].proend,
+                                        startday: moment(result.rows[i].probegin).format('LL'),
+                                        endday: moment(result.rows[i].proend).format('LL'),
                                         duration: result.rows[i].duration,
                                         owner: result.rows[i].owner,
                                         ownerid: result.rows[i].ownerid

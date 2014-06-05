@@ -40,9 +40,9 @@ block content
                                                         | &nbsp;&nbsp;剩余天数:
                                                         =project.remainday
                                                     .panel-
-                                                        .col-md-8
+                                                        .col-md-10
                                                             =project.des
-                                                        .col-md-4
+                                                        .col-md-2
                                                             form(id='deleteproject'+project.projectid, action='/delete_project' hidden='true', method='post')
                                                                 input.form-control(type='text', hidden='true', id="projectid", name="projectid", value=project.projectid)
                                                                 input.form-control(type='text', hidden='true', id="teamid", name="teamid", value=team.teamid)
@@ -58,9 +58,9 @@ block content
                                                         | &nbsp;&nbsp;剩余天数:
                                                         =project.remainday
                                                     .panel-body
-                                                        .col-md-8
+                                                        .col-md-10
                                                             =project.des
-                                                        .col-md-4
+                                                        .col-md-2
                                                             form(id='deleteproject'+project.projectid, action='/delete_project' hidden='true', method='post')
                                                                 input.form-control(type='text', hidden='true', id="projectid", name="projectid", value=project.projectid)
                                                                 input.form-control(type='text', hidden='true', id="teamid", name="teamid", value=team.teamid)
@@ -77,9 +77,9 @@ block content
                                                 .panel-heading
                                                     a.panel-title(href='/project/'+project.projectid)=project.name
                                                 .panel-body
-                                                    .col-md-8
+                                                    .col-md-10
                                                         =project.des
-                                                    .col-md-4
+                                                    .col-md-2
                                                         form(id='deleteproject'+project.projectid, action='/delete_project' hidden='true', method='post')
                                                             input.form-control(type='text', hidden='true', id="projectid", name="projectid", value=project.projectid)
                                                             input.form-control(type='text', hidden='true', id="teamid", name="teamid", value=team.teamid)

@@ -43,9 +43,9 @@ block content
                                            | &nbsp;&nbsp;剩余天数:
                                            =task.remainday
                                        .panel-body
-                                            .col-md-8
+                                            .col-md-9
                                                 =task.des
-                                            .col-md-4
+                                            .col-md-3
                                                 form(id='completetask'+task.taskid, hidden='true', method='get')
                                                     input.form-control(type='text', hidden='true', id="taskid", name="taskid", value=task.taskid)
                                                 button.btn.btn-success(type='button', id='uncomplete'+task.taskid, href='#', name=task.taskid) 完成
@@ -71,9 +71,9 @@ block content
                                       | &nbsp;&nbsp;剩余天数:
                                       =task.remainday
                                   .panel-body
-                                          .col-md-8
+                                          .col-md-9
                                               =task.des
-                                          .col-md-4
+                                          .col-md-3
                                             form(id='completetask'+task.taskid, hidden='true', method='get')
                                                 input.form-control(type='text', hidden='true', id="taskid", name="taskid", value=task.taskid)
                                             button.btn.btn-success(type='button', id='complete', href='#', name=task.taskid) 完成
@@ -92,9 +92,9 @@ block content
                                               .panel-heading
                                                   a.panel-title(href='/task/'+task.taskid)=task.name
                                               .panel-body
-                                                  .col-md-8
+                                                  .col-md-9
                                                       =task.des
-                                                  .col-md-4
+                                                  .col-md-3
                                                           form(id='completetask'+task.taskid, hidden='true', method='get')
                                                               input.form-control(type='text', hidden='true', id="taskid", name="taskid", value=task.taskid)
                                                           button.btn.btn-warning(type='button', id='uncomplete'+task.taskid, href='#', name=task.taskid) 重做
@@ -140,6 +140,10 @@ block content
                                     button.close(type='button', data-dismiss='modal', aria-hidden='true') ×
                                     h4#myModalLabel.modal-title 创建新任务
                                 .modal-body
+                                    .alert.alert-danger.fade.in(id='alert')
+                                        button.close(type='button', data-dismiss='alert', aria-hidden='true') ×
+                                        strong 错误
+                                        | 请重新检查该表单
                                     form.form-horizontal(id='newtask', method='post')
                                       fieldset
                                         .form-group
@@ -190,9 +194,16 @@ block content
                                         button.btn.btn-default(type='button', data-dismiss='modal') 关闭
                                         button.btn.btn-primary(type='button', id='save', href='#', name='save') 创建任务
                                 script.
+                                    $(document).ready(function() {
+                                        $(".alert").hide();
+                                    });
                                     $('#save').on('click', function(e){
                                     // We don't want this to act as a link so cancel the link action
                                         e.preventDefault();
+                                        if($('#taskname').val() == "" || $('#taskdes').val() == "" || $('#date').val() == "") {
+                                            $("#alert").alert();
+                                            return;
+                                        }
                                     // Find form and submit it
                                         $('#newtask').submit();
                                     });
