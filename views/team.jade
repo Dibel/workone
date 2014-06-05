@@ -95,10 +95,12 @@ block content
                                 return;
                             }
                             $(this).bind("click",function(e){
+                                if(confirm('确认删除？')) {
                                     e.preventDefault();
                                     var id=$(this).attr('name');
                                     var taskform='#deleteproject'+id.toString();
                                     $(taskform).submit();
+                                }
                             });
                         });
                 .col-md-2.column

@@ -10,7 +10,9 @@ block content
                     h1=project.name
                         small 项目
                     div
-                        span='组建日期:'+project.startday+'  解散日期:'+project.endday+'  负责人:'+project.ownername
+                        span.label.label-default(style='margin-left:5px')='组建日期: '+project.startday
+                        span.label.label-default(style='margin-left:5px')='解散日期: '+project.endday
+                        span.label.label-default(style='margin-left:5px')='负责人: '+project.ownername
                 .col-md-2.column
                         h3.text-primary.text-left
                             | 项目成员
@@ -113,11 +115,12 @@ block content
                             console.log(id);
                             if(id == 'delete') {
                                 $(this).bind("click",function(e){
-                                    console.log($(this).attr('delete'));
-                                    e.preventDefault();
-                                    var id=$(this).attr('name');
-                                    var taskform='#deletetask'+id.toString();
-                                    $(taskform).submit();
+                                    if(confirm('确认删除？')) {
+                                        e.preventDefault();
+                                        var id=$(this).attr('name');
+                                        var taskform='#deletetask'+id.toString();
+                                        $(taskform).submit();
+                                    }
                                 });
                             } else {
                                 $(this).bind("click",function(e){

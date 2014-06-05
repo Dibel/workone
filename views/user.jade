@@ -22,7 +22,7 @@ block content
                            li
                             a(href='/project/'+'#{project.projectid}')= project.name
                 .col-md-8.column
-                    h3 我的任务
+                    h3 未完成的任务
                     .panel-group
                       -if(tasks != null)
                        -each task in tasks
@@ -39,7 +39,12 @@ block content
                                  =task.remainday
                              .panel-collapse.collapse.in
                                  .panel-body
-                                     =task.des
+                                     .col-md-10
+                                        =task.des
+                                     .col-md-2
+                                         form(id='completetask'+task.taskid, hidden='true', method='get')
+                                             input.form-control(type='text', hidden='true', id="taskid", name="taskid", value=task.taskid)
+                                         button.btn.btn-success(type='button', id='complete', href='#', name=task.taskid) 完成
                         -else
                           .panel.panel-info
                             .panel-heading
@@ -53,11 +58,19 @@ block content
                                 =task.remainday
                             .panel-collapse.collapse.in
                                 .panel-body
-                                    =task.des
-                        //.panel.panel-default
-                            .panel-heading
-                                a.panel-title(data-toggle='collapse', data-parent='#panel-812500', href='#panel-element-758966') Collapsible Group Item #2
-                            #panel-element-758966.panel-collapse.collapse
-                                .panel-body
-                                    | Anim pariatur cliche...
+                                    .col-md-10
+                                        =task.des
+                                    .col-md-2
+                                        form(id='completetask'+task.taskid, hidden='true', method='get')
+                                            input.form-control(type='text', hidden='true', id="taskid", name="taskid", value=task.taskid)
+                                        button.btn.btn-success(type='button', id='complete', href='#', name=task.taskid) 完成
+                    script.
+                        $("[href='#']").each(function() {
+                            $(this).bind("click",function(e){
+                                e.preventDefault();
+                                var id=$(this).attr('name');
+                                var taskform='#completetask'+id.toString();
+                                $(taskform).submit();
+                            });
+                        });
                 .col-md-4.column

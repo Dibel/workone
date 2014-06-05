@@ -23,6 +23,10 @@ exports.login = function(req, res) {
         password = crypto.createHash('md5').update(password).digest('hex');
         //client.connect();
         pg.connect(connectionString, function(err, client) {
+            if(err) {
+                console.log(err.message);
+                return res.redirect('/login');
+            }
             client.query('SELECT * FROM user_password_name($1);', [name],function(err, result) {
                 if(err) {
                     console.log(err.message);
@@ -82,6 +86,10 @@ exports.register = function(req, res) {
         password = crypto.createHash('md5').update(password).digest('hex');
         //client.connect();
         pg.connect(connectionString, function(err, client) {
+            if(err) {
+                console.log(err.message);
+                return res.redirect('/register');
+            }
             //TODO:SQL Query
             //var query = client.query('SELECT * FROM newteam($1,$2,$3)', [1,'test','test']);
             var query = client.query('INSERT INTO "User" ("NAME","PASSWORD","LOGINNAME") VALUES($1,$2,$3) returning "ID";', [truename, password, name]);
@@ -119,86 +127,99 @@ exports.register = function(req, res) {
 
 exports.user = function (req, res) {
     var uid = req.session.user.uid;
-    pg.connect(connectionString, function(err, client) {
-        if(err) {
-            console.log(err.message);
-            return null;
-        }
-        client.query("SELECT * FROM usertask_unfinished($1)", [uid], function(err, result) {
+    if(req.query.taskid) {
+        var taskid = req.query.taskid;
+        pg.connect(connectionString, function(err ,client) {
             if(err) {
                 console.log(err.message);
-                return res.redirect('/home');
+                return res.redirect('/user');
             }
-            if(result.rowCount > 0) {
-                var mytasks = [];
-                for (var i = 0; i <result.rowCount; i++) {
-                    var mytask = new Task({
-                        name: result.rows[i].taskname,
-                        des: result.rows[i].taskdes,
-                        startday: moment(result.rows[i].startdate).format('LL'),
-                        endday: moment(result.rows[i].enddate).format('LL'),
-                        projectname: result.rows[i].projectname,
-                        teamname: result.rows[i].teamname,
-                        remainday: result.rows[i].remainday,
-                        taskid: result.rows[i].taskid
-                    });
-                    mytasks.push(mytask);
-                }
-                client.query("SELECT * FROM userproject_unfinished($1)", [uid], function (err, result) {
-                    if (err) {
-                        console.log(err.message);
-                        return res.redirect('/home');
-                    }
-                    if (result.rowCount > 0) {
-                        var myprojects = [];
-                        for (var i = 0; i <result.rowCount; i++) {
-                            var myproject = new Project({
-                                name: result.rows[i].project_name,
-                                des: result.rows[i].project_des,
-                                owner: result.rows[i].project_owner,
-                                startday: moment(result.rows[i].setup_day).format('LL'),
-                                endday: moment(result.rows[i].closing_day).format('LL'),
-                                teamname: result.rows[i].team_name,
-                                projectid: result.rows[i].projectid,
-                                remainday: result.rows[i].remainday
-                            });
-                            myprojects.push(myproject);
-                        }
-                        client.query("SELECT * FROM userteam_undisbanded($1)", [uid], function (err, result) {
-                            if (err) {
-                                console.log(err.message);
-                                return res.redirect('/home');
-                            }
-                            if (result.rowCount > 0) {
-                                var myteams = [];
-                                for (var i = 0; i <result.rowCount; i++) {
-                                    var teamprojects = [];
-                                    myprojects.forEach(function (project, j) {
-                                        if (project.teamname == result.rows[i].team_name) {
-                                            teamprojects.push(project);
-                                        }
-                                    });
-                                    var myteam = new Team({
-                                        name: result.rows[i].team_name,
-                                        des: result.rows[i].team_des,
-                                        owner: result.rows[i].team_owner,
-                                        startday: result.rows[i].setup_day,
-                                        teamid: result.rows[i].teamid,
-                                        projects: teamprojects
-                                    });
-                                    myteams.push(myteam);
-                                }
-                                res.render('user', {title: req.session.user.truename + '的主页', user: req.session.user.truename, id: 'user', teams: myteams, projects: myprojects, tasks: mytasks});
-                            }
-                        });
-                    } else {
-                        res.render('user', {title: req.session.user.truename + '的主页', user: req.session.user.truename, id: 'user', teams: null, projects: null, tasks: mytasks});
-                    }
-                });
-            } else {
-                res.render('user', {title: req.session.user.truename + '的主页', user: req.session.user.truename, id: 'user', teams: null, projects: null, tasks: null});
-            }
+            client.query('SELECT * FROM updatecomplete($1)', [taskid], function(err, result) {
+                console.log(result);
+                return res.redirect('/user');
+            });
         });
+    } else {
+        pg.connect(connectionString, function (err, client) {
+            if (err) {
+                console.log(err.message);
+                return null;
+            }
+            client.query("SELECT * FROM usertask_unfinished($1)", [uid], function (err, result) {
+                if (err) {
+                    console.log(err.message);
+                    return res.redirect('/home');
+                }
+                if (result.rowCount > 0) {
+                    var mytasks = [];
+                    for (var i = 0; i < result.rowCount; i++) {
+                        var mytask = new Task({
+                            name: result.rows[i].taskname,
+                            des: result.rows[i].taskdes,
+                            startday: moment(result.rows[i].startdate).format('LL'),
+                            endday: moment(result.rows[i].enddate).format('LL'),
+                            projectname: result.rows[i].projectname,
+                            teamname: result.rows[i].teamname,
+                            remainday: result.rows[i].remainday,
+                            taskid: result.rows[i].taskid
+                        });
+                        mytasks.push(mytask);
+                    }
+                    client.query("SELECT * FROM userproject_unfinished($1)", [uid], function (err, result) {
+                        if (err) {
+                            console.log(err.message);
+                            return res.redirect('/home');
+                        }
+                        if (result.rowCount > 0) {
+                            var myprojects = [];
+                            for (var i = 0; i < result.rowCount; i++) {
+                                var myproject = new Project({
+                                    name: result.rows[i].project_name,
+                                    des: result.rows[i].project_des,
+                                    owner: result.rows[i].project_owner,
+                                    startday: moment(result.rows[i].setup_day).format('LL'),
+                                    endday: moment(result.rows[i].closing_day).format('LL'),
+                                    teamname: result.rows[i].team_name,
+                                    projectid: result.rows[i].projectid,
+                                    remainday: result.rows[i].remainday
+                                });
+                                myprojects.push(myproject);
+                            }
+                            client.query("SELECT * FROM userteam_undisbanded($1)", [uid], function (err, result) {
+                                if (err) {
+                                    console.log(err.message);
+                                    return res.redirect('/home');
+                                }
+                                if (result.rowCount > 0) {
+                                    var myteams = [];
+                                    for (var i = 0; i < result.rowCount; i++) {
+                                        var teamprojects = [];
+                                        myprojects.forEach(function (project, j) {
+                                            if (project.teamname == result.rows[i].team_name) {
+                                                teamprojects.push(project);
+                                            }
+                                        });
+                                        var myteam = new Team({
+                                            name: result.rows[i].team_name,
+                                            des: result.rows[i].team_des,
+                                            owner: result.rows[i].team_owner,
+                                            startday: result.rows[i].setup_day,
+                                            teamid: result.rows[i].teamid,
+                                            projects: teamprojects
+                                        });
+                                        myteams.push(myteam);
+                                    }
+                                    res.render('user', {title: req.session.user.truename + '的主页', user: req.session.user.truename, id: 'user', teams: myteams, projects: myprojects, tasks: mytasks});
+                                }
+                            });
+                        } else {
+                            res.render('user', {title: req.session.user.truename + '的主页', user: req.session.user.truename, id: 'user', teams: null, projects: null, tasks: mytasks});
+                        }
+                    });
+                } else {
+                    res.render('user', {title: req.session.user.truename + '的主页', user: req.session.user.truename, id: 'user', teams: null, projects: null, tasks: null});
+                }
+            });
 //        query.on('error', function(err) {
 //            console.log(err.message);
 //            return null;
@@ -223,7 +244,8 @@ exports.user = function (req, res) {
 //            }
 //            return null;
 //        });
-    });
+        });
+    }
 };
 
 
